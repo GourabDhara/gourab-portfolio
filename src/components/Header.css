@@ -1,0 +1,330 @@
+.site-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 1.55% 3.2% 0;
+  animation: headerDrop 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* .site-header is plain `position: absolute` against whatever positioned
+   ancestor it's rendered inside (Hero's own .hero-stage). .hero-stage
+   itself is `position: sticky` for the Hero -> Intro portion of the
+   scroll (see .hero-stage in Hero.css) and releases back into normal
+   flow once that transition ends -- so Header travels with it: pinned
+   for exactly as long as Hero is pinned, then scrolling away together
+   with Hero for the rest of the page (Work, Creative Lab, About,
+   Playground, Contact), rather than staying fixed to the viewport
+   independently of Home. */
+
+@keyframes headerDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Brand ---------- */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(38px, 2.39cqw, 48px);
+  height: clamp(38px, 2.39cqw, 48px);
+  border-radius: 12px;
+  background: var(--color-ink);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(0.85rem, 0.7cqw, 1.05rem);
+  letter-spacing: 0.02em;
+  transition: background var(--theme-duration) var(--theme-ease), color var(--theme-duration) var(--theme-ease);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(0.72rem, 0.6cqw, 0.92rem);
+  letter-spacing: 0.02em;
+  color: var(--color-ink);
+  transition: color var(--theme-duration) var(--theme-ease);
+}
+
+.brand-role {
+  font-family: var(--font-body);
+  font-size: clamp(0.6rem, 0.48cqw, 0.72rem);
+  color: var(--color-ink-faint);
+  transition: color var(--theme-duration) var(--theme-ease);
+}
+
+/* ---------- Nav pill ---------- */
+.nav-pill {
+  display: flex;
+  align-items: center;
+  gap: clamp(2px, 0.21cqw, 6px);
+  padding: clamp(6px, 0.42cqw, 9px);
+  border-radius: 999px;
+  background: var(--surface-glass-strong);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--surface-glass-border);
+  box-shadow: var(--shadow-soft);
+  flex-shrink: 1;
+  min-width: 0;
+  transition: background var(--theme-duration) var(--theme-ease), border-color var(--theme-duration) var(--theme-ease), box-shadow var(--theme-duration) var(--theme-ease);
+}
+
+.nav-item {
+  position: relative;
+  z-index: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: clamp(6px, 0.39cqw, 9px) clamp(10px, 1cqw, 18px);
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: clamp(0.68rem, 0.55cqw, 0.85rem);
+  color: var(--color-ink-soft);
+  transition: color 0.25s ease, background 0.25s ease;
+  white-space: nowrap;
+}
+
+.nav-item:hover {
+  color: var(--color-ink);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.nav-item.is-active {
+  color: var(--color-ink);
+  font-weight: 600;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(20, 14, 2, 0.08);
+}
+
+/* ---------- Dark mode overrides ----------
+   Deliberately scoped to the bare [data-theme='dark'] attribute rather
+   than `.hero-stage[data-theme='dark']`: Header is mounted inside more
+   than one themed root (.hero-stage on Home, .about-page on About), and
+   both set the same data-theme attribute on themselves. Keying off the
+   attribute alone lets every page that wraps Header in a themed root
+   pick these rules up automatically, so dark-mode nav/pill/switch
+   styling can never drift out of sync between pages again. */
+[data-theme='dark'] .nav-item:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+[data-theme='dark'] .nav-item.is-active {
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- Right pills ---------- */
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: clamp(8px, 0.63cqw, 12px);
+  flex-shrink: 0;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(6px, 0.42cqw, 10px);
+  border-radius: 999px;
+  background: var(--surface-glass-strong);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--surface-glass-border);
+  box-shadow: var(--shadow-soft);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: clamp(0.65rem, 0.53cqw, 0.82rem);
+  color: var(--color-ink);
+  white-space: nowrap;
+  transition: background var(--theme-duration) var(--theme-ease), border-color var(--theme-duration) var(--theme-ease), box-shadow var(--theme-duration) var(--theme-ease), color var(--theme-duration) var(--theme-ease);
+}
+
+.pill-available {
+  padding: clamp(4px, 0.28cqw, 6px) clamp(14px, 1.1cqw, 18px) clamp(4px, 0.28cqw, 6px) clamp(4px, 0.28cqw, 6px);
+}
+
+.pill-avatar {
+  width: clamp(26px, 1.55cqw, 34px);
+  height: clamp(26px, 1.55cqw, 34px);
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: 50% 20%;
+  border: 1.5px solid #fff;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3ec96b;
+  box-shadow: 0 0 0 3px rgba(62, 201, 107, 0.25);
+}
+
+.pill-toggle {
+  padding: clamp(7px, 0.46cqw, 10px) clamp(12px, 1cqw, 16px);
+  border: 1px solid var(--surface-glass-border);
+  cursor: pointer;
+  transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease, transform 0.2s ease;
+}
+
+.pill-toggle:hover {
+  background: #fff;
+}
+
+[data-theme='dark'] .pill-toggle:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.pill-toggle:active {
+  transform: scale(0.97);
+}
+
+.switch {
+  position: relative;
+  width: 30px;
+  height: 17px;
+  border-radius: 999px;
+  background: #e8e1d2;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  transition: background 0.4s ease;
+}
+
+.switch.is-on {
+  background: #d8cfba;
+}
+
+[data-theme='dark'] .switch {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+[data-theme='dark'] .switch.is-on {
+  background: rgba(242, 148, 30, 0.4);
+}
+
+.switch-knob {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--color-ink);
+  transform: translateX(0);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), background 0.4s ease;
+}
+
+.switch.is-on .switch-knob {
+  transform: translateX(13px);
+}
+
+/* ---------- Dark mode overrides ---------- */
+[data-theme='dark'] .brand-mark {
+  background: var(--color-surface-dark, #12182b);
+  color: #fff;
+}
+
+@media (max-width: 900px) {
+  .nav-pill {
+    /* Header's own nav pill is desktop-only now -- mobile navigation for
+       every section (including Home) goes through the one persistent
+       MobileNav overlay instead (see MobileNav.jsx/.css), which reuses
+       these same .nav-pill/.nav-item styles in its own slide-down menu. */
+    display: none;
+  }
+}
+
+/* ===================================================================
+   MOBILE HEADER (phone-first rebuild)
+   Scoped entirely to <=900px (same breakpoint the mobile hero uses).
+   Desktop rules above are untouched.
+   Uses cqw units against .hero-stage's existing inline-size container.
+=================================================================== */
+@media (max-width: 900px) {
+  .site-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.3cqw;
+    padding: 3% 5.5% 0;
+  }
+
+  .brand-role {
+    display: block;
+  }
+
+  .brand-mark {
+    width: 9cqw;
+    height: 9cqw;
+    min-width: 34px;
+    min-height: 34px;
+    border-radius: 22%;
+    font-size: 3.6cqw;
+  }
+
+  .brand-name {
+    font-size: 3.6cqw;
+  }
+
+  .brand-role {
+    font-size: 2.7cqw;
+  }
+
+  .header-right {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-top: 1.1%;
+    gap: 1.6cqw;
+  }
+
+  .pill {
+    font-size: 2.7cqw;
+  }
+
+  .pill-available span:first-of-type {
+    display: inline;
+  }
+
+  .pill-available {
+    padding: 0.9cqw 2.6cqw 0.9cqw 0.9cqw;
+  }
+
+  .pill-avatar {
+    width: 6cqw;
+    height: 6cqw;
+    min-width: 20px;
+    min-height: 20px;
+  }
+
+  .pill-toggle {
+    padding: 1.7cqw 2.6cqw;
+  }
+}

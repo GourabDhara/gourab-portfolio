@@ -1,0 +1,146 @@
+:root {
+  --font-display: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-hand: 'Caveat', cursive;
+
+  --color-ink: #17140f;
+  --color-ink-soft: #4a453e;
+  --color-ink-faint: #746e64;
+
+  --color-accent: #f2941e;
+  --color-accent-deep: #e07f0e;
+  --color-accent-soft: #ffd9a0;
+
+  --color-cream: #fbf5e9;
+  --color-cream-deep: #f3e8d3;
+
+  /* Single source of truth for the Page-2 (Intro) surface colour, in
+     both themes. The Hero-to-Intro cloud transition (SceneTransition.css)
+     and Intro itself (Intro.css) both read these same two tokens so
+     their backgrounds can never drift apart into a visible seam. */
+  --page-bg-light: #fbf1e2;
+  --page-bg-dark: #0a0a0c;
+
+  /* Height of the decorative cloud crop at the top of Page 2 (Intro),
+     shared by three places that must never drift out of sync: how
+     tall the cloud PNG itself is cropped to (Intro.css), how far
+     Intro's own background stays transparent before revealing the
+     cloud artwork over Page 1 (Intro.css), and how long Page 1 (Hero)
+     stays pinned via position:sticky before releasing (Hero.css's
+     .hero-sticky-track). Tall enough that the crop reaches well into
+     the source artwork's own connected/solid region (not just its
+     sparser top edge) -- see a mobile-specific override for this same
+     property further down in this file. */
+  --cloud-h: clamp(230px, 24vw, 350px);
+
+  --surface-glass: rgba(255, 253, 248, 0.5);
+  --surface-glass-strong: rgba(255, 253, 248, 0.72);
+  --surface-glass-border: rgba(255, 255, 255, 0.65);
+
+  --shadow-soft: 0 8px 24px rgba(30, 22, 6, 0.08);
+  --shadow-card: 0 20px 45px rgba(40, 28, 6, 0.14);
+  --shadow-note: 0 14px 26px rgba(20, 14, 2, 0.22);
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  /* The one global page-background fallback layer, sitting beneath every
+     section's own themed root. Now theme-aware via [data-theme] on body
+     itself (see the dark/light mirror in App.jsx), so this only shows
+     briefly at the very edges -- overscroll bounce, a resize before
+     layout settles, the loading screen behind a transparent edge, or
+     the corners exposed by the whole-site barrel roll's rotation --
+     and always matches whichever theme is actually live instead of
+     defaulting to light. Previously hardcoded to --page-bg-light with
+     no dark-mode counterpart at all, which is what made a dark-mode
+     barrel roll flash a white/cream wedge at the rotated corners. */
+  background: var(--page-bg-light);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body[data-theme='dark'] {
+  background: var(--page-bg-dark);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  font-family: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (max-width: 900px) {
+  :root {
+    /* Mobile cloud artwork is portrait-oriented and needs proportionally
+       more of its own height revealed for the shapes to read clearly. */
+    --cloud-h: clamp(190px, 59vw, 240px);
+  }
+}
+
+/* Respect reduced motion preference across the app */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =========================================================================
+   WHOLE-SITE BARREL ROLL EASTER EGG (see useBarrelRollEasterEgg in
+   PlaygroundSection.jsx for the state machine that toggles these
+   classes, and its animation keyframes injected in that component's own
+   <style> block). Lives here rather than in Playground's scoped styles
+   because it targets #root directly, not anything inside
+   .playground-section.
+
+   Targets #root (not <html>/<body>). #root is body's only child and is
+   the shared ancestor of every fixed-position element in the app
+   (PrimaryNav, MobileNav, Hero, LoadingScreen) as well as every
+   normal-flow section, so rotating it produces the exact same
+   "whole page spins as one surface" visual as rotating body would.
+
+   The difference that matters: <html>/<body> are never touched, so the
+   real document scroll (and native fixed positioning relative to the
+   viewport within #root) is never frozen, clipped, or reset. That is
+   what fixes both the "jumps to Home" bug (it was never really a jump
+   to Home -- forcing html/body to height:100vh while overflow:hidden
+   collapsed the scroll position, which *looked* like a jump to the
+   top) and the "must stay scrollable while upside down" requirement:
+   there is simply nothing left locking scroll anymore. overflow-x on
+   body already guards horizontal overflow during the animation. */
+#root.br-rolling,
+#root.br-flipping-down,
+#root.br-flipped,
+#root.br-flipping-up {
+  transform-origin: 50% 50%;
+}

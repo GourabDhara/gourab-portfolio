@@ -1,0 +1,447 @@
+/* ==========================================================================
+   Intro / About section
+   New section — did not exist in the project before. Self-contained theme
+   tokens (mirrors the pattern already used by .hero-stage[data-theme]) so
+   this section can sit outside the Hero stage and still switch cleanly
+   between Light and Dark Mode from the same `dark` prop.
+   ========================================================================== */
+
+.intro-content {
+  --intro-bg: var(--page-bg-light);
+  --intro-bg-deep: #f6e6cf;
+  --intro-ink: #17140f;
+  --intro-ink-soft: #55504a;
+  --intro-ink-faint: #8a847a;
+  --intro-accent: #f2941e;
+  --intro-divider: rgba(23, 20, 15, 0.14);
+  --intro-pill-bg: rgba(242, 148, 30, 0.14);
+  --intro-pill-ink: #17140f;
+  --intro-quote-bg: #ffffff;
+  --intro-quote-shadow: 0 16px 40px rgba(60, 40, 10, 0.1);
+
+  --tone-amber-bg: #fbe0ad;
+  --tone-amber-ink: #8a4f0a;
+  --tone-blue-bg: #cfe3fb;
+  --tone-blue-ink: #1f4f8a;
+  --tone-green-bg: #d3ecd2;
+  --tone-green-ink: #276b34;
+  --tone-terracotta-bg: #f6d7c4;
+  --tone-terracotta-ink: #8a3f1f;
+
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  /* Pulled up by exactly the cloud's own height so this section's real
+     (rendered) top edge lands right where Hero ends, same as before
+     --cloud-h existed -- see .hero-sticky-track in Hero.css, which
+     reserves that same distance again *after* Hero so Hero has
+     somewhere to release the scroll. Without this, that reserved
+     distance would show up as a gap between Hero and Intro instead of
+     the intended overlap. */
+  margin-top: calc(-1 * var(--cloud-h));
+  /* Not a flat fill: this box is transparent for the first ~78% of
+     --cloud-h (matching .intro-cloud's own mask above), then cuts to
+     the real, theme-correct --intro-bg at that same 78% point -- a
+     hard stop, not a ramp. That top sliver being transparent is what
+     lets Page 1 (Hero, pinned behind via position:sticky) show through
+     the cloud PNG's actual alpha gaps as Page 2 rises over it on
+     scroll. The stop is a hard cut rather than a gradual ramp to
+     --cloud-h on purpose: at typical viewport widths the source cloud
+     art hasn't fully closed into a solid silhouette by 78% (object-fit:
+     cover only shows part of the source PNG's height, and how much
+     varies with viewport width), so a gradual ramp let a few of the
+     art's still-open gaps in that last stretch show through as a
+     washed-out, semi-opaque blend of this background over Hero instead
+     of either genuine cloud-art transparency or the solid surface. A
+     hard stop means the cloud's own mask fade (same 78-100% range,
+     see .intro-cloud below) is what dissolves the art away, and
+     anything it doesn't cover from 78% on is simply this section's
+     real solid surface -- continuous, not faded. */
+  background: linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--cloud-h) * 0.78),
+    var(--intro-bg) calc(var(--cloud-h) * 0.78)
+  );
+  color: var(--intro-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(90px, 10vh, 140px) clamp(24px, 6vw, 96px) clamp(48px, 6vh, 90px);
+  overflow: hidden;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+.intro-content[data-theme='dark'] {
+  --intro-bg: var(--page-bg-dark);
+  --intro-bg-deep: #050506;
+  --intro-ink: #f4f2ee;
+  --intro-ink-soft: #b9b4ac;
+  --intro-ink-faint: #85807a;
+  --intro-divider: rgba(255, 255, 255, 0.14);
+  --intro-pill-bg: rgba(242, 148, 30, 0.14);
+  --intro-pill-ink: #f4f2ee;
+  --intro-quote-bg: rgba(255, 255, 255, 0.06);
+  --intro-quote-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+
+  --tone-amber-bg: rgba(251, 178, 66, 0.16);
+  --tone-amber-ink: #f2b23f;
+  --tone-blue-bg: rgba(96, 150, 224, 0.16);
+  --tone-blue-ink: #7fb0ee;
+  --tone-green-bg: rgba(96, 200, 120, 0.16);
+  --tone-green-ink: #7ed397;
+  --tone-terracotta-bg: rgba(224, 130, 80, 0.18);
+  --tone-terracotta-ink: #e79767;
+
+  color-scheme: dark;
+}
+
+.intro-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+/* ---------- Cloud transition (decorative, see Intro.jsx) ----------
+   Sits at the very top of Intro's own box, in front of Intro's
+   background but behind .intro-inner. Compact on purpose -- tall
+   enough to show the cloud artwork's main shapes, short enough to
+   stay a boundary accent rather than a standalone block; height comes
+   from --cloud-h (set on .intro-content above) so the crop and the
+   background fade below can never drift apart.
+   From 0-78% of that height it's shown at full opacity, so its real
+   alpha channel is what's on screen -- opaque pixels paint the cloud
+   art, transparent pixels let Page 1 (Hero, pinned behind via
+   position:sticky) show straight through. That 78% cutoff is chosen
+   to sit past the point (roughly a third of the way down the source
+   PNG) where the artwork's own shapes have already closed up into a
+   solid, connected edge, rather than fading through a still-gappy
+   middle -- so what dissolves in the last stretch is a genuinely
+   solid cloud shape, not empty space. From 78-100% it fades to
+   nothing at the same rate .intro-content's own background fades in,
+   so the handoff from "cloud art over Page 1" to "Intro's flat
+   surface" reads as one continuous dissolve, not a hard edge. */
+.intro-cloud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 100%;
+  height: var(--cloud-h);
+  object-fit: cover;
+  object-position: center top;
+  pointer-events: none;
+  user-select: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 78%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 78%, transparent 100%);
+}
+
+/* ---------- Location + flight path ---------- */
+.intro-top {
+  /* Pushes just this location/flight-path row down far enough to clear
+     the cloud crop above (--cloud-h) plus a small breathing gap,
+     regardless of viewport size -- it was rendering at .intro-content's
+     own padding-top (well inside the cloud's height), so it visually
+     sat inside the transition instead of below it. position:relative
+     is deliberately NOT used here: this needs to reserve real flow
+     height so the heading/paragraph/etc. that follow keep their normal
+     stacked spacing relative to *this* row, rather than overlapping it.
+     max(0px, ...) guards against a negative margin on any viewport
+     combination where --cloud-h is smaller than the existing top
+     padding. */
+  margin-top: max(0px, calc(var(--cloud-h) - clamp(90px, 10vh, 140px) + clamp(16px, 2vw, 28px)));
+  margin-bottom: clamp(28px, 4vw, 46px);
+}
+
+.intro-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 clamp(16px, 2.4vw, 26px);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(0.78rem, 0.9vw, 0.95rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--intro-ink);
+}
+
+.intro-location svg {
+  color: var(--intro-accent);
+  flex-shrink: 0;
+}
+
+.intro-path-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: clamp(60px, 8vw, 110px);
+}
+
+.intro-flight-path {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.intro-plane {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-58%) rotate(6deg);
+  color: var(--intro-ink);
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.18));
+}
+
+/* ---------- Heading ---------- */
+.intro-heading-block {
+  max-width: 900px;
+  margin-bottom: clamp(34px, 4.5vw, 54px);
+}
+
+.intro-heading {
+  margin: 0 0 clamp(18px, 2.2vw, 26px);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.6rem, 2.7vw, 2.5rem);
+  line-height: 1.4;
+  color: var(--intro-ink);
+}
+
+.intro-underline-wrap {
+  position: relative;
+  display: inline-block;
+  font-weight: 700;
+}
+
+.intro-underline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.14em;
+  width: 100%;
+  height: 0.35em;
+  overflow: visible;
+}
+
+.intro-paragraph {
+  margin: 0;
+  max-width: 640px;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: clamp(0.95rem, 1.05vw, 1.1rem);
+  line-height: 1.7;
+  color: var(--intro-ink-soft);
+}
+
+/* ---------- Capability blocks ---------- */
+.intro-capabilities {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: clamp(36px, 4.5vw, 56px);
+}
+
+.intro-cap {
+  padding: 0 clamp(14px, 1.8vw, 28px);
+  border-left: 1px solid var(--intro-divider);
+}
+
+.intro-cap:first-child {
+  padding-left: 0;
+  border-left: none;
+}
+
+.intro-cap-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(38px, 3.2vw, 48px);
+  height: clamp(38px, 3.2vw, 48px);
+  border-radius: 12px;
+  margin-bottom: clamp(12px, 1.6vw, 20px);
+}
+
+.intro-cap-icon.tone-amber { background: var(--tone-amber-bg); color: var(--tone-amber-ink); }
+.intro-cap-icon.tone-blue { background: var(--tone-blue-bg); color: var(--tone-blue-ink); }
+.intro-cap-icon.tone-green { background: var(--tone-green-bg); color: var(--tone-green-ink); }
+.intro-cap-icon.tone-terracotta { background: var(--tone-terracotta-bg); color: var(--tone-terracotta-ink); }
+
+.intro-cap-label {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(0.82rem, 0.95vw, 1rem);
+  letter-spacing: 0.02em;
+  color: var(--intro-ink);
+}
+
+.intro-cap-body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: clamp(0.78rem, 0.85vw, 0.92rem);
+  line-height: 1.5;
+  color: var(--intro-ink-soft);
+}
+
+/* ---------- Tools ---------- */
+.intro-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: clamp(14px, 1.6vw, 22px);
+  margin-bottom: clamp(30px, 3.6vw, 44px);
+}
+
+.intro-tools-label {
+  font-family: var(--font-body);
+  font-size: clamp(0.82rem, 0.9vw, 0.95rem);
+  color: var(--intro-ink-soft);
+  white-space: nowrap;
+}
+
+.intro-tools-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(8px, 0.9vw, 12px);
+}
+
+.intro-tool-pill {
+  padding: clamp(8px, 0.85vw, 11px) clamp(16px, 1.5vw, 20px);
+  border-radius: 999px;
+  background: var(--intro-pill-bg);
+  color: var(--intro-pill-ink);
+  font-family: var(--font-body);
+  font-size: clamp(0.78rem, 0.85vw, 0.9rem);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ---------- Quote card ---------- */
+.intro-quote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 1.2vw, 18px);
+  padding: clamp(18px, 2.2vw, 26px) clamp(24px, 3vw, 40px);
+  border-radius: 999px;
+  background: var(--intro-quote-bg);
+  box-shadow: var(--intro-quote-shadow);
+}
+
+.intro-quote p {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(0.95rem, 1.15vw, 1.2rem);
+  color: var(--intro-ink);
+}
+
+.intro-quote-mark {
+  flex-shrink: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.8rem, 2.6vw, 2.6rem);
+  line-height: 1;
+  color: var(--intro-accent);
+}
+
+/* ==========================================================================
+   Mobile ( <= 900px, matching the breakpoint already used across the site )
+   Content restacks single-column; capability blocks switch from the
+   4-up divided row to a vertical icon-left list, mirroring the pattern
+   already established by FeatureCards' own mobile layout.
+   ========================================================================== */
+@media (max-width: 900px) {
+  .intro-content {
+    padding: clamp(64px, 14vw, 96px) 22px clamp(40px, 10vw, 64px);
+    align-items: flex-start;
+  }
+
+  .intro-top {
+    /* Same clearance logic as the desktop rule above, just reading the
+       mobile padding-top value this breakpoint actually uses (see
+       .intro-content immediately above) instead of the desktop one --
+       otherwise this row would still fall short of clearing the cloud
+       on narrow viewports. */
+    margin-top: max(0px, calc(var(--cloud-h) - clamp(64px, 14vw, 96px) + clamp(16px, 2vw, 28px)));
+  }
+
+  .intro-path-row {
+    height: 22vw;
+    max-height: 130px;
+  }
+
+  .intro-plane {
+    width: 34px;
+    height: 34px;
+  }
+
+  .intro-heading {
+    font-size: clamp(1.35rem, 5.6vw, 1.7rem);
+    line-height: 1.42;
+  }
+
+  .intro-paragraph {
+    max-width: 100%;
+    font-size: 0.92rem;
+  }
+
+  .intro-capabilities {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .intro-cap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    border-left: none;
+    border-top: 1px solid var(--intro-divider);
+  }
+
+  .intro-cap:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .intro-cap-icon {
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  .intro-tools {
+    gap: 10px;
+  }
+
+  .intro-tools-label {
+    width: 100%;
+    margin-bottom: 2px;
+  }
+
+  .intro-quote {
+    border-radius: 22px;
+    align-items: flex-start;
+  }
+
+  .intro-quote p {
+    text-align: left;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .intro-quote-mark {
+    font-size: 1.6rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-content {
+    transition: none;
+  }
+}

@@ -1,0 +1,2055 @@
+/* ---------- Theme tokens ----------
+   Same values/mechanism as AboutPage.css: --theme-duration/--theme-ease
+   match Hero's day<->night pacing exactly, so the reveal reads as the
+   same transition, not a lookalike. --motion-ease carries this page's
+   own entrance/hover curve, unaffected by the theme pacing above it. */
+.contact-page {
+  --contact-bg: var(--page-bg-light);
+  --contact-ink: #15120f;
+  --contact-soft: #4c4640;
+  --contact-panel: rgba(255, 255, 255, 0.7);
+  --contact-panel-strong: rgba(255, 255, 255, 0.86);
+  --contact-border: rgba(83, 63, 35, 0.1);
+  --contact-input-bg: rgba(255, 255, 255, 0.6);
+  --contact-badge-peach: #ffd9bc;
+  --contact-badge-lavender: #d9d6ff;
+  --contact-badge-green: #d3ead0;
+  --contact-badge-amber: #ffe4b0;
+  --contact-avatar-bg: #f3ede1;
+  --contact-avatar-skin: #e8b98a;
+  --contact-avatar-hair: #2a211a;
+  --color-ink: #15120f;
+  --color-ink-soft: #4c4640;
+  --color-ink-faint: #746e64;
+  --surface-glass: rgba(255, 253, 248, 0.5);
+  --surface-glass-strong: rgba(255, 253, 248, 0.78);
+  --surface-glass-border: rgba(255, 255, 255, 0.76);
+  --shadow-soft: 0 8px 24px rgba(30, 22, 6, 0.08);
+  --theme-duration: 1.7s;
+  --theme-ease: cubic-bezier(0.45, 0, 0.15, 1);
+  --theme-origin-x: 92%;
+  --theme-origin-y: 8%;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  min-height: 100vh;
+  padding: clamp(128px, 12vw, 170px) clamp(24px, 5vw, 78px) clamp(60px, 6vw, 90px);
+  color: var(--contact-ink);
+  background: var(--contact-bg);
+  overflow: hidden;
+}
+
+.contact-page[data-theme='dark'] {
+  --contact-bg: var(--page-bg-dark);
+  --contact-ink: #f6f2ea;
+  --contact-soft: #c6c0b5;
+  --contact-panel: rgba(26, 31, 45, 0.82);
+  --contact-panel-strong: rgba(26, 31, 45, 0.92);
+  --contact-border: rgba(255, 255, 255, 0.1);
+  --contact-input-bg: rgba(255, 255, 255, 0.06);
+  --contact-badge-peach: rgba(242, 148, 30, 0.18);
+  --contact-badge-lavender: rgba(124, 111, 240, 0.22);
+  --contact-badge-green: rgba(117, 155, 88, 0.22);
+  --contact-badge-amber: rgba(242, 148, 30, 0.22);
+  --contact-avatar-bg: #1a1f2d;
+  --contact-avatar-skin: #d9a878;
+  --contact-avatar-hair: #0d0a08;
+  --color-ink: #f6f2ea;
+  --color-ink-soft: #c6c0b5;
+  --color-ink-faint: #aaa49a;
+  --surface-glass: rgba(20, 25, 38, 0.62);
+  --surface-glass-strong: rgba(20, 25, 38, 0.78);
+  --surface-glass-border: rgba(255, 255, 255, 0.12);
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --color-surface-dark: #12182b;
+  color-scheme: dark;
+}
+
+.contact-page .site-header {
+  position: absolute;
+  transition: opacity 0.48s cubic-bezier(0.22, 1, 0.36, 1), transform 0.56s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.contact-page .site-header.is-scroll-hidden {
+  opacity: 0;
+  transform: translateY(-34px);
+  pointer-events: none;
+}
+
+/* ---------- Safety net: real color transitions on theme flip ----------
+   Same technique/reasoning as AboutPage.css's identical block: every
+   themed surface transitions on its own rather than snapping, while
+   Header (which paces its own transitions per-element in Header.css)
+   is excluded via :where() so this net can never out-specificity it
+   or any element-specific transition declared later in this file. */
+.contact-page,
+.contact-page *:where(:not(.site-header, .site-header *, .baruog-backdrop, .baruog-backdrop *)) {
+  transition: color var(--theme-duration) var(--theme-ease), background-color var(--theme-duration) var(--theme-ease),
+    border-color var(--theme-duration) var(--theme-ease), box-shadow var(--theme-duration) var(--theme-ease);
+}
+.contact-page *:where(:not(.site-header, .site-header *, .baruog-backdrop, .baruog-backdrop *))::before,
+.contact-page *:where(:not(.site-header, .site-header *, .baruog-backdrop, .baruog-backdrop *))::after {
+  transition: color var(--theme-duration) var(--theme-ease), background-color var(--theme-duration) var(--theme-ease),
+    border-color var(--theme-duration) var(--theme-ease);
+}
+
+/* ---------- Background reveal (same mechanism as Hero/About) ----------
+   Reuses the globally-registered --reveal-radius @property (declared
+   once in Hero.css) rather than redeclaring it.
+
+   `position: sticky` (not fixed) -- same fix and same reasoning as
+   AboutPage.css's own .about-bg (see the comment there): Contact is
+   now a permanent section in one continuous scroll alongside every
+   other section, all mounted at once, so a `fixed` background stays
+   pinned to the whole viewport rather than this section's own box --
+   it would paint on top of every section that comes before Contact in
+   DOM order for the entire time the page is open, not just while
+   Contact happens to be on screen. Sticky keeps the same "background
+   stays behind content while scrolling through this section" effect,
+   scoped to Contact's own box. */
+.contact-bg {
+  position: sticky;
+  top: 0;
+  inset: 0;
+  height: 100vh;
+  margin-bottom: -100vh;
+  z-index: 0;
+  pointer-events: none;
+}
+.contact-bg-day {
+  background: radial-gradient(circle at 88% 10%, #fff 0, transparent 22%), radial-gradient(circle at 4% 74%, #f6e6d4 0, transparent 24%), var(--page-bg-light);
+}
+.contact-bg-night {
+  background: radial-gradient(circle at 88% 10%, #1c293f 0, transparent 24%), radial-gradient(circle at 4% 74%, #211b31 0, transparent 28%), var(--page-bg-dark);
+  --reveal-radius: 0%;
+  -webkit-mask-image: radial-gradient(circle at var(--theme-origin-x, 92%) var(--theme-origin-y, 8%), #000 0%, #000 max(0%, calc(var(--reveal-radius) - 12%)), transparent var(--reveal-radius));
+  mask-image: radial-gradient(circle at var(--theme-origin-x, 92%) var(--theme-origin-y, 8%), #000 0%, #000 max(0%, calc(var(--reveal-radius) - 12%)), transparent var(--reveal-radius));
+  transition: --reveal-radius var(--theme-duration) var(--theme-ease);
+  will-change: mask-image, -webkit-mask-image;
+}
+.contact-page[data-theme='dark'] .contact-bg-night {
+  --reveal-radius: 150%;
+}
+
+/* ---------- Theme-glow pulse (identical element/animation as Hero/About) ----------
+   `position: sticky`, same fix and reasoning as .contact-bg above and
+   AboutPage.css's own .theme-glow -- scoped to Contact's own box
+   instead of bleeding across every other permanently-mounted section. */
+.contact-page .theme-glow {
+  position: sticky;
+  top: 0;
+  inset: 0;
+  height: 100vh;
+  margin-bottom: -100vh;
+}
+.contact-page[data-theme='dark'] .theme-glow {
+  animation: themeGlowPulse var(--theme-duration) var(--theme-ease) forwards;
+}
+
+/* ==========================================================================
+   Contact hero: headline + supporting copy (left) / contact cards (right)
+   ========================================================================== */
+.contact-hero {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto clamp(28px, 3vw, 40px);
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  gap: clamp(28px, 4vw, 56px);
+  align-items: start;
+}
+
+.contact-copy {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-kicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  color: #f26816;
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.contact-kicker span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.contact-copy h1 {
+  margin: 0 0 22px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.4rem, 3.6vw, 3.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--contact-ink);
+}
+
+.contact-headline-hand {
+  display: inline-block;
+  font-family: var(--font-hand);
+  font-weight: 700;
+  color: #f2941e;
+  font-size: 1.32em;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  position: relative;
+  padding-bottom: 0.14em;
+}
+.contact-headline-hand::after {
+  content: '';
+  position: absolute;
+  left: 2%;
+  right: 8%;
+  bottom: -0.02em;
+  height: 8px;
+  border-top: 3px solid #7c6ff0;
+  border-radius: 50%;
+  transform: rotate(-1.4deg);
+}
+.hand-dot {
+  color: #7c6ff0;
+}
+
+.contact-lede {
+  max-width: 460px;
+  margin: 0;
+  font-size: clamp(0.95rem, 1.1vw, 1.06rem);
+  line-height: 1.85;
+  color: var(--contact-soft);
+}
+
+.contact-hero-deco {
+  position: relative;
+  height: clamp(70px, 7vw, 104px);
+  max-width: 250px;
+  margin-top: clamp(6px, 1.2vw, 14px);
+}
+.hero-flight-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.hero-flight-path {
+  stroke: #7c6ff0;
+  opacity: 0.85;
+}
+.contact-page[data-theme='dark'] .hero-flight-path {
+  stroke: #a99bff;
+  opacity: 0.75;
+}
+.hero-flight-plane .plane-fill {
+  fill: var(--contact-panel-strong);
+  stroke: var(--contact-ink);
+  stroke-width: 2.6;
+  stroke-linejoin: round;
+}
+.hero-flight-plane .plane-fold {
+  fill: var(--contact-bg);
+  stroke: var(--contact-ink);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+.hero-flight-plane path:last-child {
+  stroke: var(--contact-ink);
+  stroke-width: 2.6;
+  fill: none;
+}
+.hero-flight-spark {
+  fill: #f2941e;
+}
+.spark-dot-b {
+  fill: #7c6ff0;
+}
+
+/* ---------- Contact cards grid ---------- */
+.contact-cards-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(18px, 2.2vw, 28px);
+}
+
+.contact-cards {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(12px, 1.2vw, 20px);
+  align-self: start;
+}
+
+.contact-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(18px, 1.6vw, 26px) clamp(16px, 1.4vw, 22px) clamp(40px, 3.4vw, 52px);
+  min-height: 168px;
+  border-radius: 20px;
+  background: var(--contact-panel);
+  border: 1px solid var(--contact-border);
+  box-shadow: 0 12px 30px rgba(40, 28, 6, 0.08);
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.35s var(--motion-ease), box-shadow 0.5s ease,
+    background var(--theme-duration) var(--theme-ease), border-color var(--theme-duration) var(--theme-ease);
+  animation: cardRiseFade 0.65s var(--motion-ease) both;
+}
+.contact-card:nth-child(1) { animation-delay: 0.16s; }
+.contact-card:nth-child(2) { animation-delay: 0.24s; }
+.contact-card:nth-child(3) { animation-delay: 0.32s; }
+.contact-card:nth-child(4) { animation-delay: 0.4s; }
+
+.contact-card::before {
+  content: '';
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.contact-card.badge-peach::before, .contact-card:has(.badge-peach)::before { color: #f2941e; }
+.contact-card:has(.badge-lavender)::before { color: #7c6ff0; }
+.contact-card:has(.badge-green)::before { color: #4a9b4a; }
+.contact-card:has(.badge-amber)::before { color: #f2941e; }
+.contact-card:hover::before {
+  opacity: 0.06;
+}
+
+.contact-card:hover {
+  transform: translateY(-6px) rotate(-0.6deg);
+  box-shadow: 0 22px 42px rgba(40, 28, 6, 0.16);
+}
+.contact-card:focus-visible {
+  outline: 2px solid #f2941e;
+  outline-offset: 3px;
+}
+
+.contact-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(40px, 3.2vw, 50px);
+  height: clamp(40px, 3.2vw, 50px);
+  border-radius: 50%;
+  margin-bottom: clamp(12px, 1.2vw, 18px);
+  color: var(--color-ink);
+  transition: transform 0.35s ease;
+}
+.contact-card:hover .contact-card-icon {
+  transform: scale(1.08) rotate(-4deg);
+}
+.badge-peach { background: var(--contact-badge-peach); color: #d9660f; }
+.badge-lavender { background: var(--contact-badge-lavender); color: #5b53d6; }
+.badge-green { background: var(--contact-badge-green); color: #3f7a38; }
+.badge-amber { background: var(--contact-badge-amber); color: #d9660f; }
+
+.contact-card-label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(0.92rem, 0.9vw, 1.06rem);
+  margin-bottom: 6px;
+  color: var(--contact-ink);
+}
+.contact-card-value {
+  font-size: clamp(0.7rem, 0.66vw, 0.8rem);
+  line-height: 1.5;
+  color: var(--contact-soft);
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+.contact-card-arrow {
+  position: absolute;
+  right: clamp(14px, 1.2vw, 20px);
+  bottom: clamp(14px, 1.2vw, 20px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  transition: transform 0.3s ease;
+}
+.contact-card:hover .contact-card-arrow {
+  transform: translate(2px, -2px);
+}
+
+.contact-deco-dots {
+  position: absolute;
+  right: -6%;
+  top: 46%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+.contact-deco-dots span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #f2b06a;
+}
+
+/* ---------- Behance pill ----------
+   A compact secondary destination rather than a fifth grid card, so
+   the 4-card rhythm from the reference stays intact while still
+   surfacing Behance clearly. Icon treatment matches the reference's
+   rounded-square indigo "Be" tile rather than a circular brand badge. */
+.behance-pill {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 18px;
+  border-radius: 999px;
+  background: var(--contact-panel);
+  border: 1px solid var(--contact-border);
+  color: var(--contact-soft);
+  font-size: 0.84rem;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(40, 28, 6, 0.06);
+  transition: transform 0.3s var(--motion-ease), box-shadow 0.4s ease, border-color 0.3s ease;
+  animation: cardRiseFade 0.65s var(--motion-ease) both;
+  animation-delay: 0.5s;
+}
+.behance-pill strong {
+  color: var(--contact-ink);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+.behance-pill-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #6a5cff, #4432c9);
+}
+.contact-page[data-theme='dark'] .behance-pill-icon {
+  background: linear-gradient(135deg, #8478ff, #5b4fe0);
+}
+.behance-pill svg:last-child {
+  margin-left: 2px;
+  color: #7c6ff0;
+  transition: transform 0.3s ease;
+}
+.behance-pill:hover {
+  transform: translateY(-2px);
+  border-color: rgba(124, 111, 240, 0.4);
+  box-shadow: 0 14px 28px rgba(40, 28, 6, 0.12);
+}
+.behance-pill:hover svg:last-child {
+  transform: translate(2px, -2px);
+}
+.behance-pill:focus-visible {
+  outline: 2px solid #f2941e;
+  outline-offset: 3px;
+}
+
+@keyframes cardRiseFade {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Availability strip ----------
+   A dedicated composition beat between Behance and the form, matching
+   the reference's "Currently Available / Typical Response / Time
+   Zone" band. Reuses the same badge-* color tokens as the contact
+   cards so the palette reads as one system rather than a bolt-on. */
+.availability-strip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: clamp(10px, 1.6vw, 22px);
+  padding: clamp(16px, 1.6vw, 22px) clamp(18px, 2vw, 28px);
+  border-radius: 20px;
+  background: var(--contact-panel);
+  border: 1px solid var(--contact-border);
+  box-shadow: 0 12px 28px rgba(40, 28, 6, 0.07);
+  animation: cardRiseFade 0.65s var(--motion-ease) both;
+  animation-delay: 0.56s;
+}
+.availability-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1 1 190px;
+  min-width: 0;
+}
+.availability-divider {
+  width: 1px;
+  align-self: stretch;
+  flex: 0 0 auto;
+  margin-right: 12px;
+  background: var(--contact-border);
+}
+.availability-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.availability-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.availability-copy strong {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.86rem;
+  color: var(--contact-ink);
+}
+.availability-copy span {
+  font-size: 0.78rem;
+  line-height: 1.42;
+  color: var(--contact-soft);
+}
+
+/* ---------- Rhythm connector ----------
+   A small deliberate beat between the hero/cards block and the form
+   panel, replacing what was previously just empty margin. */
+.contact-rhythm-connector {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  height: clamp(28px, 3vw, 40px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.connector-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #f2941e;
+  opacity: 0.5;
+}
+.connector-dot:nth-child(2) {
+  width: 7px;
+  height: 7px;
+  background: #7c6ff0;
+  opacity: 0.7;
+}
+
+/* ==========================================================================
+   Send a Message + Gourab AI row
+   ========================================================================== */
+.contact-form-row {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto clamp(28px, 3vw, 44px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 350px);
+  gap: clamp(20px, 2.4vw, 32px);
+  align-items: stretch;
+}
+
+.contact-form-section {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
+  gap: clamp(24px, 3vw, 40px);
+  padding: clamp(24px, 2.6vw, 38px);
+  border-radius: 26px;
+  background: var(--contact-panel);
+  border: 1px solid var(--contact-border);
+  box-shadow: 0 16px 40px rgba(40, 28, 6, 0.08);
+  animation: riseFade 0.7s var(--motion-ease) both;
+  animation-delay: 0.35s;
+}
+
+.form-copy h2 {
+  position: relative;
+  display: inline-block;
+  margin: 0 0 20px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.3rem, 1.6vw, 1.65rem);
+  color: var(--contact-ink);
+}
+.form-underline {
+  display: block;
+  width: 46px;
+  height: 3px;
+  margin-top: 8px;
+  border-radius: 2px;
+  background: #f2941e;
+}
+.form-copy p {
+  margin: 0 0 22px;
+  max-width: 320px;
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: var(--contact-soft);
+}
+.form-squiggle {
+  color: #7c6ff0;
+  opacity: 0.75;
+}
+
+/* ---------- Quick-chat card ----------
+   Reproduces the "Prefer a quick chat?" mini-panel from the reference,
+   sitting under the squiggle inside the same left column as the form
+   copy. Reuses the lavender badge tone from the contact cards. */
+.quick-chat-card {
+  display: flex;
+  gap: 12px;
+  margin-top: 22px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: rgba(124, 111, 240, 0.08);
+  border: 1px solid rgba(124, 111, 240, 0.16);
+}
+.contact-page[data-theme='dark'] .quick-chat-card {
+  background: rgba(124, 111, 240, 0.14);
+  border-color: rgba(124, 111, 240, 0.26);
+}
+.quick-chat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--contact-badge-lavender);
+  color: #5b53d6;
+}
+.quick-chat-copy strong {
+  display: block;
+  margin-bottom: 3px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--contact-ink);
+}
+.quick-chat-copy p {
+  margin: 0 0 10px;
+  max-width: none;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--contact-soft);
+}
+.quick-chat-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--contact-panel-strong);
+  border: 1px solid var(--contact-border);
+  color: #5b53d6;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  transition: transform 0.25s var(--motion-ease), box-shadow 0.3s ease,
+    background-color var(--theme-duration) var(--theme-ease), border-color var(--theme-duration) var(--theme-ease);
+}
+.quick-chat-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(91, 83, 214, 0.18);
+}
+.quick-chat-btn:focus-visible {
+  outline: 2px solid #7c6ff0;
+  outline-offset: 2px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 13px;
+  border: 1px solid var(--contact-border);
+  background: var(--contact-input-bg);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  resize: vertical;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease,
+    background var(--theme-duration) var(--theme-ease);
+}
+.contact-form input::placeholder,
+.contact-form textarea::placeholder {
+  color: var(--color-ink-faint);
+}
+.contact-form input:focus,
+.contact-form textarea:focus {
+  outline: none;
+  border-color: #f2941e;
+  box-shadow: 0 0 0 3px rgba(242, 148, 30, 0.16);
+}
+.contact-form textarea {
+  min-height: 108px;
+  font-family: var(--font-body);
+}
+
+.send-message-btn {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 24px;
+  border: none;
+  border-radius: 13px;
+  background: #f2941e;
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: transform 0.25s var(--motion-ease), box-shadow 0.3s ease, background 0.3s ease;
+}
+.send-message-btn:hover {
+  background: #e07f0e;
+  box-shadow: 0 12px 26px rgba(224, 127, 14, 0.32);
+  transform: translateY(-2px);
+}
+.send-message-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+.send-message-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.form-status {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.form-status-success {
+  color: #2f7a3d;
+  background: rgba(74, 155, 74, 0.14);
+  border: 1px solid rgba(74, 155, 74, 0.3);
+}
+.form-status-error {
+  color: #b3401f;
+  background: rgba(224, 90, 40, 0.12);
+  border: 1px solid rgba(224, 90, 40, 0.3);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==========================================================================
+   Gourab AI — compact portfolio chatbot
+   Deliberately built from the same tokens/badges/radii as the rest of
+   the page (see .contact-page vars + badge-* above) rather than a
+   separate widget skin, per "must not look like a generic ChatGPT
+   clone."
+   ========================================================================== */
+.chatbot-panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-radius: 24px;
+  background: var(--contact-panel-strong);
+  border: 1px solid var(--contact-border);
+  box-shadow: 0 16px 40px rgba(40, 28, 6, 0.08);
+  overflow: hidden;
+  animation: riseFade 0.7s var(--motion-ease) both;
+  animation-delay: 0.44s;
+}
+
+.chatbot-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--contact-border);
+  background: linear-gradient(120deg, rgba(242, 148, 30, 0.12), rgba(124, 111, 240, 0.1));
+}
+.chatbot-header-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #f2941e;
+  color: #fff;
+}
+.chatbot-header-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: var(--contact-ink);
+}
+.chatbot-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+}
+.chatbot-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--contact-soft);
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+.chatbot-icon-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--contact-ink);
+}
+.contact-page[data-theme='dark'] .chatbot-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.chatbot-icon-btn:focus-visible {
+  outline: 2px solid #f2941e;
+  outline-offset: 2px;
+}
+
+.chatbot-collapsible {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.chatbot-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  max-height: 340px;
+  min-height: 220px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.chatbot-msg {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 92%;
+  animation: chatMsgIn 0.3s var(--motion-ease) both;
+}
+.chatbot-msg p {
+  margin: 0;
+  padding: 10px 13px;
+  border-radius: 14px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.chatbot-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+.chatbot-msg-assistant {
+  align-self: flex-start;
+}
+.chatbot-msg-assistant p {
+  background: var(--contact-panel);
+  border: 1px solid var(--contact-border);
+  border-bottom-left-radius: 4px;
+  color: var(--contact-ink);
+}
+.chatbot-msg-user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+.chatbot-msg-user p {
+  background: #f2941e;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.chatbot-msg-typing p {
+  display: none;
+}
+.chatbot-typing-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border-bottom-left-radius: 4px;
+  background: var(--contact-panel);
+  border: 1px solid var(--contact-border);
+}
+.chatbot-typing-dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--contact-soft);
+  animation: typingBounce 1.1s ease-in-out infinite;
+}
+.chatbot-typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+.chatbot-typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+.chatbot-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 0 16px 12px;
+}
+.chatbot-suggestion-chip {
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--contact-border);
+  background: var(--contact-panel);
+  color: var(--contact-soft);
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s var(--motion-ease), border-color 0.2s ease, color 0.2s ease;
+}
+.chatbot-suggestion-chip:hover {
+  transform: translateY(-1px);
+  border-color: #f2941e;
+  color: var(--contact-ink);
+}
+.chatbot-suggestion-chip:focus-visible {
+  outline: 2px solid #f2941e;
+  outline-offset: 2px;
+}
+
+.chatbot-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  margin: 0 12px 4px;
+  border-radius: 14px;
+  border: 1px solid var(--contact-border);
+  background: var(--contact-input-bg);
+}
+.chatbot-input-row input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  color: var(--color-ink);
+}
+.chatbot-input-row input::placeholder {
+  color: var(--color-ink-faint);
+}
+.chatbot-send-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: #f2941e;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s var(--motion-ease), background 0.2s ease, opacity 0.2s ease;
+}
+.chatbot-send-btn:hover:not(:disabled) {
+  background: #e07f0e;
+  transform: scale(1.06);
+}
+.chatbot-send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.chatbot-send-btn:focus-visible {
+  outline: 2px solid #f2941e;
+  outline-offset: 2px;
+}
+
+.chatbot-disclaimer {
+  margin: 6px 0 12px;
+  padding: 0 16px;
+  text-align: center;
+  font-size: 0.66rem;
+  color: var(--color-ink-faint);
+}
+
+@keyframes chatMsgIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-3px); opacity: 1; }
+}
+
+/* ==========================================================================
+   BARU-OG section
+   Rebuilt around the supplied asset sheet: magnifying glass, hand-
+   lettered wordmark, curved dashed connector, "Click here" trigger and
+   the classified-folder illustration, arranged left-to-right the way
+   the reference composes them, with a scattering of the sheet's own
+   spark accents rather than invented decoration.
+   ========================================================================== */
+.baruog-section {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: clamp(30px, 3.4vw, 46px) clamp(28px, 4vw, 60px);
+  border-radius: 28px;
+  background: linear-gradient(120deg, rgba(216, 210, 245, 0.55), rgba(255, 226, 196, 0.35));
+  border: 1px solid var(--contact-border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(18px, 2.6vw, 36px);
+  overflow: hidden;
+  animation: riseFade 0.7s var(--motion-ease) both;
+  animation-delay: 0.5s;
+}
+.contact-page[data-theme='dark'] .baruog-section {
+  background: linear-gradient(120deg, rgba(124, 111, 240, 0.16), rgba(242, 148, 30, 0.1));
+}
+
+.baruog-decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.baruog-deco {
+  position: absolute;
+  animation: sparkle 3.4s ease-in-out infinite;
+}
+.deco-spark-orange { width: 34px; top: 6%; left: 43%; animation-delay: -0.6s; }
+.deco-spark-purple { width: 24px; top: 68%; left: 23%; animation-delay: -1.6s; }
+.deco-spark-dot { width: 14px; top: 18%; left: 45%; animation-delay: -2.2s; }
+.deco-spark-small-a { width: 18px; top: 80%; left: 51%; animation-delay: -0.9s; }
+.deco-spark-small-b { width: 16px; top: 12%; left: 62%; animation-delay: -1.9s; }
+
+.baruog-glass-col {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+.baruog-glass-img {
+  width: clamp(74px, 6.6vw, 108px);
+  filter: drop-shadow(0 10px 18px rgba(20, 14, 2, 0.18));
+}
+
+.baruog-name-col {
+  position: relative;
+  z-index: 1;
+  flex: 0 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.baruog-fact-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #f26816;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.baruog-fact-kicker span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.baruog-intro {
+  margin: 0;
+  font-size: clamp(0.92rem, 1vw, 1.05rem);
+  font-weight: 600;
+  color: var(--contact-ink);
+  white-space: nowrap;
+}
+.baruog-wordmark {
+  width: clamp(190px, 15vw, 260px);
+  margin-top: 2px;
+}
+
+.baruog-connector-arrow {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  width: clamp(56px, 5.6vw, 96px);
+  align-self: center;
+  opacity: 0.92;
+}
+.contact-page[data-theme='dark'] .baruog-connector-arrow {
+  opacity: 0.8;
+  filter: brightness(1.25);
+}
+
+.baruog-story-col {
+  position: relative;
+  z-index: 1;
+  flex: 0 1 auto;
+  min-width: 200px;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.baruog-story-text {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--contact-soft);
+}
+.baruog-cta {
+  position: relative;
+  margin: 0;
+  font-family: var(--font-hand);
+  font-size: clamp(1.1rem, 1.4vw, 1.4rem);
+  font-weight: 600;
+  color: var(--contact-ink);
+}
+.baruog-click-btn {
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin-top: 2px;
+  cursor: pointer;
+  transition: transform 0.3s var(--motion-ease), filter 0.3s ease;
+  filter: drop-shadow(0 10px 20px rgba(20, 14, 2, 0.16));
+}
+.baruog-click-btn img {
+  width: clamp(150px, 13vw, 190px);
+  display: block;
+}
+.baruog-click-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+}
+.baruog-click-btn:active {
+  transform: translateY(-1px) scale(0.99);
+}
+.baruog-click-btn:focus-visible {
+  outline: 2px solid #f2941e;
+  outline-offset: 4px;
+  border-radius: 999px;
+}
+
+.baruog-folder-col {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  width: clamp(112px, 10vw, 168px);
+}
+.baruog-folder-img {
+  width: 100%;
+  display: block;
+  filter: drop-shadow(0 14px 26px rgba(20, 14, 2, 0.2));
+}
+.baruog-topsecret-img {
+  position: absolute;
+  top: -24%;
+  left: -32%;
+  width: 46%;
+  transform: rotate(-14deg);
+  filter: drop-shadow(0 8px 14px rgba(20, 14, 2, 0.18));
+}
+
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes modalRiseIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ==========================================================================
+   BARU-OG overlay / modal
+   (Reused unchanged from the previous implementation — the reference
+   didn't call for redesigning this content, only the trigger above it.)
+   ========================================================================== */
+.baruog-backdrop {
+  position: fixed;
+  inset: 0;
+  /* Must outrank .mobile-nav-root's z-index: 200 (MobileNav.css). Both
+     are fixed-position root-level stacking contexts, so with equal
+     z-index the later-mounted one (MobileNav, mounted after
+     SceneTransition in App.jsx) paints on top -- that's what let the
+     mobile navbar/hamburger sit visually above this overlay and
+     intercept taps meant for .baruog-close. Bumping this above 200
+     is the only change needed; MobileNav.css is untouched per the
+     "don't modify the shared navbar" requirement. */
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(10, 8, 6, 0.55);
+  backdrop-filter: blur(3px);
+  animation: backdropFadeIn 0.28s ease both;
+}
+.contact-page[data-theme='dark'] .baruog-backdrop {
+  background: rgba(3, 4, 8, 0.72);
+}
+
+.baruog-modal {
+  /* This element itself no longer scrolls -- overflow-y: auto has
+     moved to .baruog-modal-scroll below, so .baruog-close (see its own
+     comment) can be positioned against this fixed-size box instead of
+     against the moving scroll content. Still the same overall size/
+     shape/background/shadow/entrance-animation as before; only the
+     scrolling responsibility moved one level in. overflow: hidden
+     keeps the inner scroll area's content clipped to the same rounded
+     corners this element already had. */
+  position: relative;
+  width: min(720px, 100%);
+  max-height: min(88vh, 780px);
+  overflow: hidden;
+  border-radius: 26px;
+  background: #fbf6ee;
+  color: #15120f;
+  box-shadow: 0 40px 90px rgba(20, 14, 2, 0.35);
+  animation: modalRiseIn 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.contact-page[data-theme='dark'] .baruog-modal {
+  background: #14192a;
+  color: #f6f2ea;
+}
+
+.baruog-modal-scroll {
+  /* The actual scrolling content box -- carries the same max-height
+     cap, padding, and overflow-y that .baruog-modal used to have
+     directly, so content scrolls inside the exact same visual bounds
+     as before; only .baruog-close (a sibling, not a descendant of
+     this element -- see the JSX) is no longer part of what scrolls. */
+  max-height: min(88vh, 780px);
+  overflow-y: auto;
+  padding: clamp(28px, 3.6vw, 44px) clamp(24px, 3.6vw, 44px) clamp(30px, 3.4vw, 40px);
+}
+
+.baruog-close {
+  /* Was positioned absolute *inside* the scrolling content box
+     (.baruog-modal itself used to have overflow-y: auto directly).
+     On mobile, where that content is taller than the viewport, the
+     button scrolled away with everything else the moment a visitor
+     scrolled to read it -- there was nothing left to tap where the ✕
+     last appeared. That was the actual root cause of the "mobile
+     close button doesn't respond" report; z-index, pointer-events, and
+     the click handler itself were never the problem. Moving the
+     scrolling responsibility to the new .baruog-modal-scroll sibling
+     (see its CSS + the JSX) means this absolute positioning is now
+     relative to .baruog-modal, which never scrolls -- so the button
+     stays fixed in the same visible corner regardless of how far the
+     content underneath has scrolled. Same position, size, and style
+     as before. */
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(83, 63, 35, 0.14);
+  background: #fff;
+  color: #15120f;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.baruog-close:hover {
+  background: #f3ede1;
+  transform: rotate(90deg);
+}
+.contact-page[data-theme='dark'] .baruog-close {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #f6f2ea;
+}
+
+.baruog-kicker {
+  position: relative;
+  margin: 0 0 6px;
+  text-align: center;
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  font-size: clamp(0.78rem, 1vw, 0.92rem);
+}
+.baruog-scribble {
+  display: inline-block;
+  width: 16px;
+  height: 10px;
+  margin: 0 8px;
+  border-top: 2px solid #7c6ff0;
+  border-radius: 40%;
+}
+.scribble-left { transform: rotate(-25deg); }
+.scribble-right { transform: rotate(25deg); }
+
+.baruog-title {
+  margin: 4px 0 10px;
+  text-align: center;
+  font-size: clamp(2rem, 4.4vw, 3rem);
+  line-height: 1;
+}
+.baruog-word-baru,
+.baruog-word-dash {
+  font-family: var(--font-hand);
+  font-weight: 700;
+  color: #7c6ff0;
+}
+.baruog-word-og {
+  font-family: var(--font-hand);
+  font-weight: 700;
+  color: #f2941e;
+}
+.baruog-qmark {
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: #15120f;
+}
+.contact-page[data-theme='dark'] .baruog-qmark {
+  color: #f6f2ea;
+}
+
+.baruog-sub {
+  margin: 0 0 22px;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #4c4640;
+}
+.contact-page[data-theme='dark'] .baruog-sub {
+  color: #c6c0b5;
+}
+.baruog-underline-word {
+  color: #7c6ff0;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: #7c6ff0;
+  text-underline-offset: 3px;
+}
+
+.baruog-mirror-box {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(14px, 3vw, 34px);
+  padding: clamp(20px, 2.8vw, 30px) clamp(18px, 2.4vw, 26px);
+  margin-bottom: 20px;
+  border-radius: 18px;
+  background: rgba(124, 111, 240, 0.06);
+  border: 1px solid rgba(83, 63, 35, 0.08);
+  overflow: hidden;
+}
+.contact-page[data-theme='dark'] .baruog-mirror-box {
+  background: rgba(124, 111, 240, 0.1);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.mirror-right-og { color: #f2941e; }
+
+/* ==========================================================================
+   Palindrome flip animation — GOURAB -> BARUOG
+   Each letter is a two-sided card (perspective + backface-visibility)
+   that rotates 180° on its Y axis, staggered so the LAST letter starts
+   first and the reveal visibly sweeps from end to start of the word —
+   the same direction the mirror runs in. Colors come from the same
+   purple/orange tokens used everywhere else on this page, so it reads
+   as one system rather than a bolt-on effect. A thin sweep bar and a
+   soft glow trail track the same right-to-left motion for reinforcement.
+   ========================================================================== */
+.palindrome-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding-top: 4px;
+}
+
+.palindrome-word {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: clamp(3px, 0.8vw, 8px);
+  perspective: 900px;
+}
+
+.palindrome-sweep {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.palindrome-letter-slot {
+  position: relative;
+  display: inline-block;
+  width: clamp(30px, 4.6vw, 46px);
+  height: clamp(40px, 6vw, 58px);
+  transform-style: preserve-3d;
+  animation: palindromeFlip var(--flip-duration, 900ms) cubic-bezier(0.5, 0.02, 0.16, 1) both;
+}
+
+.palindrome-letter-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 9px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.25rem, 2.6vw, 1.9rem);
+  letter-spacing: 0.01em;
+}
+
+.palindrome-letter-front {
+  color: var(--contact-ink);
+  background: var(--contact-panel-strong);
+  border: 1px solid rgba(21, 18, 15, 0.12);
+}
+.contact-page[data-theme='dark'] .palindrome-letter-front {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+.palindrome-letter-front.is-og {
+  color: #d9660f;
+  background: var(--contact-badge-peach);
+  border-color: rgba(242, 148, 30, 0.35);
+}
+
+.palindrome-letter-back {
+  color: #5b53d6;
+  background: var(--contact-badge-lavender);
+  border: 1px solid rgba(124, 111, 240, 0.3);
+  transform: rotateY(180deg);
+}
+
+@keyframes palindromeFlip {
+  0% { transform: rotateY(0deg); }
+  48% { transform: rotateY(90deg); }
+  52% { transform: rotateY(90deg); }
+  100% { transform: rotateY(180deg); }
+}
+
+/* Thin accent bar that sweeps right-to-left behind the letters, in the
+   same direction/timing as the per-letter stagger, so the "mirror wave"
+   reads clearly even at a glance. Purely decorative (aria-hidden). */
+.palindrome-sweep-bar {
+  fill: #f2941e;
+  opacity: 0.16;
+  animation: palindromeSweep 2.3s cubic-bezier(0.5, 0.02, 0.16, 1) both;
+  animation-delay: 2s;
+}
+.contact-page[data-theme='dark'] .palindrome-sweep-bar {
+  fill: #a99bff;
+  opacity: 0.22;
+}
+@keyframes palindromeSweep {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-290px); }
+}
+
+.palindrome-caption {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  text-align: center;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #5b53d6;
+  opacity: 0;
+  animation: palindromeCaptionIn 0.6s var(--motion-ease) both;
+  animation-delay: 4.35s;
+}
+.contact-page[data-theme='dark'] .palindrome-caption {
+  color: #a99bff;
+}
+@keyframes palindromeCaptionIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Reduced-motion static equivalent ---------- */
+.palindrome-static {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(14px, 3vw, 34px);
+  width: 100%;
+}
+.palindrome-static-word {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.15rem, 2.2vw, 1.7rem);
+  letter-spacing: 0.02em;
+  color: var(--contact-ink);
+  padding-bottom: 6px;
+  border-bottom: 2px solid #15120f;
+}
+.contact-page[data-theme='dark'] .palindrome-static-word {
+  border-bottom-color: #f6f2ea;
+}
+.palindrome-static-word-target {
+  border-bottom: none;
+  padding-bottom: 0;
+  color: #5b53d6;
+}
+.palindrome-static-axis {
+  position: relative;
+  width: 40px;
+  height: 2px;
+  background: #7c6ff0;
+  flex-shrink: 0;
+}
+.palindrome-static-axis::after {
+  content: '';
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid #7c6ff0;
+  border-right: 2px solid #7c6ff0;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.baruog-warning-label {
+  margin: 0 0 16px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  position: relative;
+  display: inline-block;
+}
+.baruog-warning-label::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 2px;
+  background: #f2941e;
+}
+
+.baruog-why-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.baruog-why-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.why-icon {
+  font-size: 1.5rem;
+  margin-bottom: 2px;
+}
+.baruog-why-item strong {
+  font-size: 0.92rem;
+}
+.baruog-why-item span:last-child {
+  font-size: 0.82rem;
+  color: #4c4640;
+}
+.contact-page[data-theme='dark'] .baruog-why-item span:last-child {
+  color: #aaa49a;
+}
+
+.baruog-final {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 22px;
+  border-radius: 14px;
+  border: 1.5px dashed #f2941e;
+  background: rgba(242, 148, 30, 0.06);
+}
+.baruog-final p {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+.final-icon { font-size: 1.4rem; flex-shrink: 0; }
+.final-spark { margin-left: auto; color: #f2941e; flex-shrink: 0; }
+
+/* ==========================================================================
+   Shared local keyframes
+   (riseFade / sparkle mirror AboutPage.css's identical keyframes, but
+   redeclared locally since Contact and About are mutually-exclusive
+   routes and never share a stylesheet at runtime.)
+   ========================================================================== */
+.contact-page { animation: contactPageIn 0.7s var(--motion-ease) both; }
+@keyframes contactPageIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes riseFade { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes sparkle { 0%, 100% { transform: scale(0.7) rotate(0deg); opacity: 0.35; } 50% { transform: scale(1.25) rotate(45deg); opacity: 1; } }
+
+.contact-copy > * { animation: riseFade 0.65s var(--motion-ease) both; }
+.contact-copy .contact-kicker { animation-delay: 0.08s; }
+.contact-copy h1 { animation-delay: 0.16s; }
+.contact-copy .contact-lede { animation-delay: 0.26s; }
+.contact-copy .contact-hero-deco { animation-delay: 0.34s; }
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@media (max-width: 1100px) {
+  .contact-hero {
+    grid-template-columns: 1fr;
+  }
+  .contact-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .contact-form-row {
+    grid-template-columns: 1fr;
+  }
+  .contact-form-section {
+    grid-template-columns: 1fr;
+  }
+  .form-copy p {
+    max-width: none;
+  }
+  .chatbot-body {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 900px) {
+  .contact-page {
+    padding: 190px 20px 40px;
+  }
+  .contact-page .site-header {
+    position: absolute;
+  }
+  .contact-page .header-right {
+    flex-direction: row;
+  }
+  .contact-page .nav-item.is-active::after {
+    bottom: -10px;
+  }
+
+  .contact-copy h1 {
+    font-size: clamp(2.1rem, 9vw, 2.9rem);
+  }
+  .contact-headline-hand {
+    font-size: 1.22em;
+  }
+
+  .contact-cards {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .contact-deco-dots {
+    display: none;
+  }
+
+  .availability-strip {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+  .availability-item {
+    flex: 0 0 auto;
+  }
+  .availability-divider {
+    display: none;
+  }
+
+  .baruog-section {
+    flex-direction: column;
+    text-align: center;
+    gap: 18px;
+    padding: 28px 22px;
+  }
+  .baruog-decor {
+    display: none;
+  }
+  .baruog-connector-arrow {
+    display: none;
+  }
+  .baruog-glass-col {
+    justify-content: center;
+  }
+  .baruog-name-col {
+    align-items: center;
+  }
+  .baruog-fact-kicker {
+    justify-content: center;
+  }
+  .baruog-story-col {
+    align-items: center;
+  }
+  .baruog-click-btn {
+    align-self: center;
+  }
+  .baruog-folder-col {
+    margin: 4px auto 0;
+  }
+
+  .baruog-why-grid {
+    grid-template-columns: 1fr;
+  }
+  .baruog-final {
+    flex-direction: column;
+    text-align: center;
+  }
+  .final-spark {
+    margin-left: 0;
+  }
+}
+
+/* ==========================================================================
+   Mobile art direction (≤640px)
+   The desktop composition simply stacks; this block re-composes each
+   section on its own terms — decorative elements are repositioned and
+   rescaled rather than hidden, so the page keeps the same visual
+   rhythm (content / decorative beat / content) instead of turning into
+   a plain vertical list with dead space between blocks.
+   ========================================================================== */
+@media (max-width: 640px) {
+  .contact-page {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  /* ---------- Hero: a composed scene, not text-then-emptiness ----------
+     The flight path/plane/sparks come back (desktop hides them below
+     900px) and grow into a wider, taller mobile-only composition that
+     sits right under the copy — filling what would otherwise be dead
+     space before the cards, rather than floating disconnected. */
+  .contact-hero {
+    gap: 6px;
+  }
+  .contact-hero-deco {
+    display: block;
+    height: 96px;
+    max-width: 100%;
+    margin-top: 4px;
+  }
+  .hero-flight-svg {
+    overflow: visible;
+  }
+
+  /* ---------- Contact cards: compact 2-up grid, not four tall stacks ---------- */
+  .contact-cards-wrap {
+    gap: 14px;
+  }
+  .contact-cards {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .contact-card {
+    min-height: 128px;
+    padding: 14px 14px 38px;
+    border-radius: 16px;
+  }
+  .contact-card-icon {
+    width: 36px;
+    height: 36px;
+    margin-bottom: 8px;
+  }
+  .contact-card-label {
+    font-size: 0.88rem;
+    margin-bottom: 3px;
+  }
+  .contact-card-value {
+    font-size: 0.68rem;
+  }
+  .contact-card-arrow {
+    width: 24px;
+    height: 24px;
+    right: 10px;
+    bottom: 10px;
+  }
+  .behance-pill {
+    align-self: stretch;
+    justify-content: center;
+  }
+
+  /* ---------- Availability: compact 2-up, not a tall stack ---------- */
+  .availability-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    flex-direction: unset;
+    gap: 12px;
+    padding: 16px;
+  }
+  .availability-item:last-child {
+    grid-column: 1 / -1;
+  }
+  .availability-item {
+    align-items: flex-start;
+  }
+  .availability-icon {
+    width: 36px;
+    height: 36px;
+    margin-top: 1px;
+  }
+  .availability-copy strong {
+    font-size: 0.8rem;
+  }
+  .availability-copy span {
+    font-size: 0.73rem;
+  }
+
+  /* ---------- Rhythm connector stays as the decorative beat between
+     the hero block and the form — already present, just confirming it
+     isn't accidentally collapsed by any rule above. ---------- */
+  .contact-rhythm-connector {
+    height: 30px;
+  }
+
+  /* ---------- Send a Message: keep it visually anchored, not a big
+     blank card — squiggle/underline already exist, just tightened. ---------- */
+  .contact-form-section {
+    padding: 22px 18px;
+    border-radius: 22px;
+  }
+  .form-copy h2 {
+    font-size: 1.2rem;
+  }
+  .contact-form input,
+  .contact-form textarea {
+    padding: 13px 16px;
+    font-size: 16px; /* prevents iOS auto-zoom on focus */
+  }
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  .send-message-btn {
+    align-self: stretch;
+    justify-content: center;
+  }
+  .baruog-why-grid {
+    text-align: left;
+  }
+  .quick-chat-card {
+    flex-direction: column;
+  }
+  .chatbot-suggestion-chip {
+    font-size: 0.72rem;
+    padding: 6px 11px;
+  }
+
+  /* ---------- Chatbot: fits the viewport, never dominates it ---------- */
+  .chatbot-body {
+    min-height: 160px;
+    max-height: 240px;
+  }
+  .chatbot-msg {
+    max-width: 88%;
+  }
+  .chatbot-suggestions {
+    padding: 0 12px 10px;
+  }
+
+  /* ---------- BARU-OG: recomposed, not hidden ----------
+     The magnifying glass and folder/note art come back at a small,
+     flanking scale either side of the centered name+CTA instead of
+     being removed, and the spark scatter is thinned rather than
+     dropped entirely, so the section keeps its "mystery dossier" feel
+     without stretching tall. */
+  .baruog-section {
+    position: relative;
+    padding: 26px 20px 24px;
+    gap: 8px;
+  }
+  .baruog-decor {
+    display: block;
+  }
+  .baruog-deco {
+    opacity: 0.7;
+  }
+  .deco-spark-orange { width: 20px; top: 6%; left: 8%; }
+  .deco-spark-purple { width: 15px; top: 72%; left: 84%; }
+  .deco-spark-dot { display: none; }
+  .deco-spark-small-a { width: 13px; top: 80%; left: 10%; }
+  .deco-spark-small-b { width: 12px; top: 5%; left: 86%; }
+
+  .baruog-glass-col {
+    opacity: 0.9;
+  }
+  .baruog-glass-img {
+    width: 44px;
+    filter: drop-shadow(0 6px 10px rgba(20, 14, 2, 0.16));
+  }
+
+  .baruog-name-col {
+    width: 100%;
+    gap: 2px;
+  }
+  .baruog-wordmark {
+    width: 200px;
+    margin: 2px auto 0;
+  }
+
+  .baruog-story-col {
+    max-width: 260px;
+    gap: 6px;
+  }
+  .baruog-story-text {
+    font-size: 0.82rem;
+  }
+
+  .baruog-folder-col {
+    position: relative;
+    width: 84px;
+    margin: 4px auto 0;
+    opacity: 0.92;
+  }
+  .baruog-topsecret-img {
+    width: 40%;
+    top: -18%;
+    left: -22%;
+  }
+}
+
+@media (max-width: 390px) {
+  .contact-page {
+    padding-top: 178px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .contact-hero-deco {
+    height: 82px;
+  }
+  .contact-cards {
+    gap: 8px;
+  }
+  .contact-card {
+    min-height: 116px;
+    padding: 12px 12px 34px;
+  }
+  .availability-strip {
+    padding: 14px;
+    gap: 10px;
+  }
+  .baruog-title {
+    font-size: 2.1rem;
+  }
+  .baruog-wordmark {
+    width: 168px;
+  }
+  .chatbot-body {
+    min-height: 180px;
+    max-height: 260px;
+  }
+  .palindrome-word {
+    gap: 3px;
+  }
+  .palindrome-letter-slot {
+    width: 28px;
+    height: 38px;
+  }
+  .palindrome-letter-face {
+    font-size: 1.1rem;
+  }
+}
+
+/* ==========================================================================
+   Reduced motion
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .contact-page,
+  .contact-copy > *,
+  .contact-card,
+  .contact-form-section,
+  .chatbot-panel,
+  .chatbot-msg,
+  .availability-strip,
+  .behance-pill,
+  .baruog-section,
+  .baruog-deco,
+  .baruog-backdrop,
+  .baruog-modal,
+  .palindrome-letter-slot,
+  .palindrome-sweep-bar,
+  .palindrome-caption {
+    animation: none !important;
+  }
+  .palindrome-caption {
+    opacity: 1;
+  }
+  .contact-card,
+  .send-message-btn,
+  .chatbot-send-btn,
+  .chatbot-suggestion-chip,
+  .baruog-click-btn,
+  .baruog-close {
+    transition-duration: 0.01ms;
+  }
+  .chatbot-typing-dots span {
+    animation: none !important;
+    opacity: 0.8;
+  }
+  .contact-bg-night {
+    transition: none;
+    --reveal-radius: 0%;
+  }
+  .contact-page[data-theme='dark'] .contact-bg-night {
+    --reveal-radius: 150%;
+  }
+}

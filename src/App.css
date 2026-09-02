@@ -1,0 +1,44 @@
+.app {
+  width: 100%;
+}
+
+/* ============================================================================
+   Home <-> About page transition (View Transitions API).
+   Scoped entirely to the browser's ::view-transition pseudo-tree, so it
+   can't touch or compete with the existing dark/light reveal, which lives
+   on --theme-origin-x/y + clip-path inside Hero.css / AboutPage.css and
+   keeps running completely independently of this.
+
+   Kept deliberately small: a fast, symmetric cross-dissolve, no slide/zoom,
+   matching the "premium, minimal, subtle" motion language already used
+   elsewhere in this project (see the cubic-bezier(0.22, 1, 0.36, 1) ease
+   used throughout Hero.css/Header.css).
+   ============================================================================ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.42s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-old(root) {
+  animation-name: page-fade-out;
+}
+
+::view-transition-new(root) {
+  animation-name: page-fade-in;
+}
+
+@keyframes page-fade-out {
+  to { opacity: 0; }
+}
+
+@keyframes page-fade-in {
+  from { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}

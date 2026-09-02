@@ -1,0 +1,10 @@
+/* Tailwind utilities only -- deliberately NOT @tailwind base or
+   @tailwind components. `base` is Tailwind's global reset/preflight
+   layer (box-sizing, margin/padding zeroing, heading/link/button style
+   resets, etc.) and would silently reach into every other hand-written
+   component on this site if imported globally. Importing only
+   `utilities` here, and only from PlaygroundSection.jsx (the sole
+   consumer of Tailwind classes in this codebase -- see
+   tailwind.config.js's `content` scope), keeps Tailwind's effect
+   confined to exactly the component that was ported using it. */
+@tailwind utilities;

@@ -1,0 +1,239 @@
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #F7F2E7;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: opacity 0.6s cubic-bezier(0.45, 0, 0.55, 1), visibility 0.6s;
+}
+
+.loading-screen.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ---------- Header row ---------- */
+/* Note: no name/personal branding is shown on the loading screen —
+   only a status readout and a rotated craft-related label, so the
+   intro stays focused on the design/craft experience itself. */
+.loading-status {
+  position: absolute;
+  top: 4.6%;
+  right: 3.4%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  color: var(--color-ink-faint, #8c8272);
+  opacity: 0;
+  animation: loadFadeDown 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+}
+
+.loading-status-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #F2941E;
+  animation: dotPulse 1.4s ease-in-out infinite;
+}
+
+/* ---------- Vertical side label ---------- */
+.loading-vertical {
+  position: absolute;
+  left: 2.6%;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.32em;
+  color: var(--color-ink-faint, #8c8272);
+  transform: translateY(-50%) rotate(-90deg);
+  transform-origin: left center;
+  white-space: nowrap;
+  opacity: 0;
+  animation: loadFadeIn 0.7s ease 0.4s forwards;
+}
+
+.loading-vertical span.dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #F2941E;
+  display: inline-block;
+}
+
+/* ---------- Centerpiece ---------- */
+.loading-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 34px;
+}
+
+.loading-graphic {
+  position: relative;
+  width: min(22vw, 240px);
+  aspect-ratio: 1;
+  opacity: 0;
+  animation: loadFadeIn 0.7s ease 0.15s forwards;
+}
+
+.loading-graphic-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+}
+
+.loading-graphic svg {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+/* Soft orange glow behind the illustration, breathing gently to
+   reinforce "something is being crafted" without a generic spinner. */
+.loading-graphic-glow {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(242, 148, 30, 0.32) 0%, rgba(242, 148, 30, 0) 70%);
+  opacity: 0;
+  animation: glowIn 1.3s ease 0.5s forwards, glowPulse 2.6s ease-in-out 1.8s infinite;
+}
+
+/* Supplied pen-tool / bezier-curve illustration — scales and fades
+   in as the centerpiece of the loading composition. */
+.loading-graphic-img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transform: scale(0.86) translateY(6px);
+  animation: graphicIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.35s forwards;
+  user-select: none;
+}
+
+.loading-copy {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(0.78rem, 1.6vw, 1.05rem);
+  letter-spacing: 0.22em;
+  color: var(--color-ink, #17140F);
+  text-align: center;
+  min-height: 1.4em;
+  opacity: 0;
+  animation: loadFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.loading-copy .accent {
+  color: #F2941E;
+}
+
+.loading-dots {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  opacity: 0;
+  animation: loadFadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 1.15s forwards;
+}
+
+.loading-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ddd2ba;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.loading-dots span.is-active {
+  background: #F2941E;
+  transform: scale(1.25);
+}
+
+.loading-caption {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.24em;
+  color: var(--color-ink-faint, #8c8272);
+  opacity: 0;
+  animation: loadFadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 1.25s forwards;
+}
+
+/* ---------- Bottom quote ---------- */
+.loading-quote {
+  position: absolute;
+  bottom: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--color-ink-soft, #4a4438);
+  font-style: italic;
+  opacity: 0;
+  animation: loadFadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 1.4s forwards;
+}
+
+.loading-quote .mark {
+  color: #F2941E;
+  font-style: normal;
+  font-size: 1rem;
+}
+
+/* ---------- Keyframes ---------- */
+@keyframes loadFadeDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes loadFadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes loadFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes graphicIn {
+  from { opacity: 0; transform: scale(0.86) translateY(6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes glowIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.75; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.75); }
+}
+
+@media (max-width: 640px) {
+  .loading-vertical {
+    display: none;
+  }
+  .loading-graphic {
+    width: 34vw;
+  }
+}

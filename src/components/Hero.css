@@ -1,0 +1,1052 @@
+/* Registering --reveal-radius lets the browser smoothly interpolate it
+   like a normal animatable property (percentages, tweened frame by
+   frame) instead of snapping instantly — this is what allows the
+   feathered day/night mask below to glide rather than pop. */
+@property --reveal-radius {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
+/* ---------- Sticky track for the Hero -> Intro overlap ----------
+   Wraps just Hero (see SceneTransition.jsx). Sized to Hero's own
+   height *plus* --cloud-h -- exactly as tall as Hero, plus one cloud
+   crop's worth of extra room -- so Hero (sticky, see below) has that
+   much scroll distance in which to stay pinned before releasing. Without
+   this wrapper, Hero's sticky containing block would be the entire
+   rest of the page (all of Intro too), so it would stay pinned far
+   longer than the cloud transition itself lasts, and keep peeking
+   through Intro's decorative top edge for the rest of the scroll.
+   Intro is pulled back up over the tail of this reserved space via a
+   matching negative top margin (see Intro.css), so none of this shows
+   up as a visible gap -- it only changes *when Hero lets go*, not
+   where Intro visually starts. */
+.hero-sticky-track {
+  position: relative;
+  height: calc(100vh + var(--cloud-h));
+}
+
+.hero-stage {
+  /* Sticky (not relative) so Page 1 stays pinned to the top of the
+     viewport as the page scrolls, instead of scrolling away with the
+     document. Intro/Page 2 (see Intro.css) follows immediately after
+     in normal flow with no gap and paints on top of it (later DOM
+     sibling, same auto stacking level) — so as the user scrolls, Page
+     2 visibly rises up from below and slides over this pinned Page 1,
+     rather than the two just changing places edge-to-edge. Page 1
+     lets go and resumes scrolling normally as soon as its sticky
+     track above runs out (see .hero-sticky-track) -- right around
+     where the cloud transition itself finishes -- rather than staying
+     pinned underneath for the rest of the page. */
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  /* Always fill the viewport edge-to-edge — no letterboxing, no side
+     gutters. The background photo below uses object-fit:cover, so it
+     crops intelligently to whatever the real viewport ratio is,
+     instead of the stage shrinking to preserve an exact 16:9 box. */
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--color-cream);
+  isolation: isolate;
+  container-type: inline-size;
+  container-name: hero;
+  /* Single shared pace/curve for the whole day→night transformation —
+     every theme-driven surface (background, UI glass, text, cards,
+     books/cup) references these two tokens so the scene settles as one
+     continuous cinematic move rather than several mismatched fades. */
+  --theme-duration: 1.7s;
+  --theme-ease: cubic-bezier(0.45, 0, 0.15, 1);
+  transition: background var(--theme-duration) var(--theme-ease);
+}
+
+/* ---------- Dark mode: theme tokens ----------
+   These override the shared design tokens from index.css, scoped only to
+   the hero stage while Dark Mode is active. Because most existing
+   components already read colors from these same custom properties
+   (headline, sub-copy, nav pills, feature cards, etc.), most of the page
+   re-colors itself automatically — only genuinely hardcoded values need
+   explicit dark-mode rules elsewhere in this file / Header.css /
+   FeatureCards.css. */
+.hero-stage[data-theme='dark'] {
+  --color-ink: #f5f3ee;
+  --color-ink-soft: #cdc9c0;
+  --color-ink-faint: #9b968c;
+  --color-accent-soft: rgba(242, 148, 30, 0.22);
+  --color-cream: #0a0e1a;
+  --color-cream-deep: #060811;
+  --surface-glass: rgba(16, 20, 36, 0.4);
+  --surface-glass-strong: rgba(16, 20, 36, 0.58);
+  --surface-glass-border: rgba(255, 255, 255, 0.12);
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 20px 45px rgba(0, 0, 0, 0.5);
+  --shadow-note: 0 14px 26px rgba(0, 0, 0, 0.5);
+  --color-surface-dark: #12182b;
+  color-scheme: dark;
+}
+
+.layer {
+  position: absolute;
+}
+
+/* ---------- Background photo ----------
+   Two full-bleed layers: the finalized day photo (always present) and
+   the night photo, which reveals through an expanding circular mask
+   anchored at the toggle. Because both share identical composition/
+   aspect ratio, no other positioning differs between them. */
+.bg-photo {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  z-index: 1;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Feathered radial mask instead of a razor-edged clip-path circle: the
+   boundary itself fades out over ~12 percentage points rather than
+   cutting instantly, so the day photo dissolves into the night photo
+   at the edge instead of showing a hard geometric seam as it expands. */
+.bg-photo-night {
+  --reveal-radius: 0%;
+  -webkit-mask-image: radial-gradient(
+    circle at var(--theme-origin-x, 92%) var(--theme-origin-y, 8%),
+    #000 0%,
+    #000 max(0%, calc(var(--reveal-radius) - 12%)),
+    transparent var(--reveal-radius)
+  );
+  mask-image: radial-gradient(
+    circle at var(--theme-origin-x, 92%) var(--theme-origin-y, 8%),
+    #000 0%,
+    #000 max(0%, calc(var(--reveal-radius) - 12%)),
+    transparent var(--reveal-radius)
+  );
+  transition: --reveal-radius var(--theme-duration) var(--theme-ease);
+  will-change: mask-image, -webkit-mask-image;
+}
+
+.hero-stage[data-theme='dark'] .bg-photo-night {
+  --reveal-radius: 150%;
+}
+
+/* ---------- Mobile-only background photos ----------
+   Fully inert on desktop (not rendered) — only takes effect inside the
+   900px mobile media query below, where it replaces the desktop 16:9
+   photos with the dedicated portrait-oriented mobile assets. */
+.bg-photo-mobile {
+  display: none;
+}
+
+/* Mobile-only moon layer (see Hero.jsx comment) — same inert-on-desktop
+   pattern as .bg-photo-mobile above. */
+.moon-mobile {
+  display: none;
+}
+
+/* Soft blue glow that blooms outward from the toggle and fades as the
+   night reveal completes — the "magic" cue for the day→night shift. */
+.theme-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    circle at var(--theme-origin-x, 92%) var(--theme-origin-y, 8%),
+    rgba(140, 180, 255, 0.55) 0%,
+    rgba(70, 100, 200, 0.28) 16%,
+    rgba(20, 30, 70, 0.12) 32%,
+    transparent 48%
+  );
+}
+
+.hero-stage[data-theme='dark'] .theme-glow {
+  animation: themeGlowPulse var(--theme-duration) var(--theme-ease) forwards;
+}
+
+@keyframes themeGlowPulse {
+  0% { opacity: 0; }
+  22% { opacity: 1; }
+  60% { opacity: 0.55; }
+  100% { opacity: 0; }
+}
+
+/* ---------- Birds — distant, ambient, fly across at staggered intervals ----------
+   Light Mode only. Each flock is a handful of small curved gull-marks
+   (see BirdFlock in Hero.jsx) drifting left-to-right at its own speed,
+   height and scale so the group feels like a loose, organic flock rather
+   than a single motif copy-pasted across the sky. */
+.birds {
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* No birds at night — the shooting stars below own the dark sky instead. */
+.hero-stage[data-theme='dark'] .birds {
+  display: none;
+}
+
+.birds-1 {
+  top: 7%;
+  left: 0;
+  width: 100px;
+  animation: flyAcross1 14s linear 1s infinite;
+}
+
+.birds-2 {
+  top: 12.5%;
+  left: 0;
+  width: 74px;
+  animation: flyAcross2 18s linear 6s infinite;
+}
+
+.birds-3 {
+  top: 4.5%;
+  left: 0;
+  width: 58px;
+  animation: flyAcross3 12s linear 3.5s infinite;
+}
+
+/* Each flock's flight is ONE unbroken linear move from fully off-screen
+   left to fully off-screen right. The transform is only ever RE-DEFINED
+   at keyframes spaced an equal 25% apart (0/25/50/75%), each advancing
+   the bird the same distance as the last — so the browser interpolates
+   it at one truly constant rate the entire way, with no segment for it
+   to ease into or out of. That constant rate is what used to break: the
+   old version eased into a held mid-flight keyframe, which is exactly
+   what read as the bird slowing down and hovering. Opacity fades in/out
+   on its own separate, tighter keyframes nested inside that same span —
+   never redefining transform — so the bird becomes visible only once
+   already at full speed and fades out while still moving, safely
+   off-screen. No visible stop, no visible teleport. A little vertical
+   drift across the 25%-spaced stops adds a natural, slightly uneven
+   flight line without ever changing the horizontal pace. */
+@keyframes flyAcross1 {
+  0%   { opacity: 0;    transform: translate(-20cqw, 0cqw) scale(1); }
+  3%   { opacity: 0.34; }
+  25%  { transform: translate(30cqw, -1.6cqw) scale(1); }
+  50%  { transform: translate(80cqw, -0.7cqw) scale(1); }
+  75%  { transform: translate(130cqw, -1.9cqw) scale(1); }
+  85%  { opacity: 0.34; }
+  90%  { opacity: 0; transform: translate(160cqw, -1.2cqw) scale(1); }
+  100% { opacity: 0; transform: translate(160cqw, -1.2cqw) scale(1); }
+}
+
+@keyframes flyAcross2 {
+  0%   { opacity: 0;    transform: translate(-16cqw, 0cqw) scale(0.85); }
+  3.5% { opacity: 0.26; }
+  25%  { transform: translate(30cqw, 1.8cqw) scale(0.85); }
+  50%  { transform: translate(76cqw, 0.8cqw) scale(0.85); }
+  75%  { transform: translate(122cqw, 2.1cqw) scale(0.85); }
+  84%  { opacity: 0.26; }
+  90%  { opacity: 0; transform: translate(150cqw, 1.3cqw) scale(0.85); }
+  100% { opacity: 0; transform: translate(150cqw, 1.3cqw) scale(0.85); }
+}
+
+@keyframes flyAcross3 {
+  0%   { opacity: 0;    transform: translate(-13cqw, 0cqw) scale(0.65); }
+  4%   { opacity: 0.2; }
+  25%  { transform: translate(29cqw, -1.4cqw) scale(0.65); }
+  50%  { transform: translate(70cqw, -0.6cqw) scale(0.65); }
+  75%  { transform: translate(112cqw, -1.7cqw) scale(0.65); }
+  83%  { opacity: 0.2; }
+  90%  { opacity: 0; transform: translate(137cqw, -1.1cqw) scale(0.65); }
+  100% { opacity: 0; transform: translate(137cqw, -1.1cqw) scale(0.65); }
+}
+
+/* Subtle wing flap: a gentle vertical squash on each bird's own path,
+   independent of the flock's flight so it never affects crossing speed.
+   Runs continuously (visible only while opacity > 0), and every bird
+   starts on its own offset via the inline animation-delay set in
+   Hero.jsx, so a flock never beats its wings in lockstep. */
+.bird-wing {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: birdFlap 0.46s ease-in-out infinite;
+}
+
+@keyframes birdFlap {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.55); }
+}
+
+/* ---------- Shooting stars — Dark Mode only, a randomized meteor shower ----------
+   Individual meteors are no longer fixed elements on a repeating CSS
+   cycle — they're mounted and unmounted by <ShootingStarField> in
+   Hero.jsx at randomized moments, in randomized clusters, with
+   randomized position/trajectory/speed/size/brightness (true randomness
+   isn't achievable from static @keyframes alone). Every meteor still
+   uses this ONE shared rule + ONE shared keyframes below; only the
+   --m-dx / --m-dy / --m-peak custom properties and the inline
+   top/left/width/animation-duration differ per instance (set inline by
+   ShootingStar in Hero.jsx), so the motion "shape" (accelerate in,
+   cruise, fade out) stays consistent while the specifics vary. */
+.shooting-star {
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  display: none;
+  /* Pivot for the per-instance --m-rot rotation in @keyframes
+     shootMeteor below: the bright head's position inside the 130x50
+     viewBox (18,43), expressed as a fraction of the box (18/130,
+     43/50). Rotating around the head — instead of the default center —
+     means the head stays anchored at its intended spawn position while
+     the tail swings to the correct angle behind it, so SPAWN_RANGES in
+     Hero.jsx (tuned against the head's on-screen position, e.g. to
+     clear the moon) stays accurate no matter what angle a given meteor
+     rotates to. */
+  transform-origin: 13.85% 86%;
+  animation-name: shootMeteor;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.hero-stage[data-theme='dark'] .shooting-star {
+  display: block;
+}
+
+/* Direction is fixed regardless of the randomized magnitude: --m-dx is
+   always negative (right-to-left) and --m-dy always positive
+   (top-to-bottom), so every meteor travels the same down-left diagonal
+   — only how far, how steeply, and (per --m-rot) at exactly what angle
+   the tail sits varies. The head + its tapering tail are one shape
+   sharing this one transform (see ShootingStar in Hero.jsx), so they
+   physically cannot drift apart, rotate independently, or lag behind,
+   no matter what --m-dx/--m-dy/--m-rot end up being for a given
+   instance. --m-rot is identical at every step below (a straight-line
+   flight doesn't curve, so the tail's angle relative to the direction
+   of travel never changes mid-flight) — only translate/scale/opacity
+   progress across the keyframes. Position is only ever redefined at 0%
+   and 100%, so each flight is one constant-speed straight line with no
+   easing to slow it down mid-flight; opacity/blur fade in/out on their
+   own nested keyframes without touching that line. rotate() is placed
+   between translate() and scale() in every step so the three always
+   compose the same way: scale and rotate anchor on the head (this
+   element's transform-origin), then translate slides the already-
+   oriented shape in real screen directions, unaffected by its own
+   rotation. */
+@keyframes shootMeteor {
+  0%   { opacity: 0; transform: translate(0, 0) rotate(var(--m-rot, 0deg)) scale(0.85); filter: blur(0px); }
+  11%  { opacity: var(--m-peak, 1); transform: translate(calc(var(--m-dx) * 0.11), calc(var(--m-dy) * 0.11)) rotate(var(--m-rot, 0deg)) scale(1); }
+  67%  { opacity: var(--m-peak, 1); transform: translate(calc(var(--m-dx) * 0.67), calc(var(--m-dy) * 0.67)) rotate(var(--m-rot, 0deg)) scale(1.05); filter: blur(0px); }
+  89%  { opacity: calc(var(--m-peak, 1) * 0.4); transform: translate(calc(var(--m-dx) * 0.89), calc(var(--m-dy) * 0.89)) rotate(var(--m-rot, 0deg)) scale(1.1); filter: blur(2.2px); }
+  100% { opacity: 0; transform: translate(var(--m-dx), var(--m-dy)) rotate(var(--m-rot, 0deg)) scale(1.15); filter: blur(4px); }
+}
+
+/* Both decorative sky layers are purely cosmetic, so when the person has
+   asked their OS for reduced motion, switch them off outright rather than
+   just letting the global animation-duration override race them through
+   in a single frame (index.css already does that for every animation, but
+   an explicit display:none here is a cleaner, guaranteed no-op). Note:
+   ShootingStarField also stops spawning new meteors entirely under
+   reduced motion, so this is a belt-and-suspenders guarantee, not the
+   only thing preventing motion. */
+@media (prefers-reduced-motion: reduce) {
+  .birds,
+  .shooting-star,
+  .hero-stage[data-theme='dark'] .shooting-star {
+    display: none !important;
+  }
+}
+
+/* ---------- Left decorative note (single combined original asset) ---------- */
+.note-userflow-combined {
+  left: 0.6%;
+  top: 52%;
+  width: 8.6%;
+  height: auto;
+  aspect-ratio: 1024 / 1536;
+  object-fit: contain;
+  z-index: 5;
+  --rot: 5deg;
+  transform: rotate(var(--rot));
+  filter: drop-shadow(var(--shadow-note));
+  opacity: 0;
+  animation: noteInLeft 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.85s both;
+  pointer-events: none;
+}
+
+@keyframes noteInLeft {
+  from { opacity: 0; transform: rotate(var(--rot, -6deg)) translateX(-24px); }
+  to { opacity: 1; transform: rotate(var(--rot, -6deg)) translateX(0); }
+}
+
+/* ---------- Headline / copy block ---------- */
+.hero-copy {
+  position: absolute;
+  left: 10.2%;
+  top: 15.5%;
+  width: 35%;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: clamp(0.85rem, 0.81cqw, 1.15rem);
+  color: var(--color-ink);
+  margin: 0 0 0.4em;
+  opacity: 0;
+  animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
+  transition: color var(--theme-duration) var(--theme-ease);
+}
+
+.wave {
+  display: inline-block;
+  animation: waveHand 2.2s ease-in-out 1.2s infinite;
+  transform-origin: 70% 70%;
+}
+
+@keyframes waveHand {
+  0%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(14deg); }
+  20% { transform: rotate(-8deg); }
+  30% { transform: rotate(14deg); }
+  40% { transform: rotate(0deg); }
+}
+
+.headline {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.35rem, 4.21cqw, 5.32rem);
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+  cursor: none;
+  transition: color var(--theme-duration) var(--theme-ease);
+}
+
+.headline .line {
+  display: block;
+  opacity: 0;
+  transform: translateY(28px);
+  animation: fadeUp 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.headline .line:nth-child(1) { animation-delay: 0.28s; }
+.headline .line:nth-child(2) { animation-delay: 0.4s; }
+.headline .line.accent { animation-delay: 0.52s; color: var(--color-accent); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Headline per-letter hover interaction ---------- */
+/* Scoped ONLY to .hover-word inside the hero headline — nothing else. */
+.hover-word {
+  display: inline-block;
+}
+
+.headline-letter {
+  display: inline-block;
+  transform: translateY(0) rotate(0deg) scale(1);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s ease;
+  will-change: transform;
+}
+
+.headline-letter:hover {
+  color: #ffb627;
+  transform: translateY(-0.14em) rotate(calc(var(--dir, 1) * 6deg)) scale(1.08);
+}
+
+/* Dynamic keyword swap — the inner wrapper remounts on word change
+   (React key), replaying this animation without disturbing the
+   headline's one-time page-load entrance. */
+.keyword-swap {
+  display: inline-block;
+  animation: keywordSwap 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes keywordSwap {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.underline-squiggle {
+  margin: 0.45em 0 0.6em 0.1em;
+  width: clamp(95px, 10.5cqw, 175px);
+  height: auto;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.68s forwards;
+}
+
+.sub-copy {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: clamp(0.8rem, 0.74cqw, 1.05rem);
+  line-height: 1.5;
+  color: var(--color-ink-soft);
+  margin: 0 0 1.5em;
+  max-width: 34ch;
+  opacity: 0;
+  animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.78s forwards;
+  transition: color var(--theme-duration) var(--theme-ease);
+}
+
+.cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: clamp(12px, 0.81cqw, 17px) clamp(20px, 1.9cqw, 28px);
+  border-radius: 999px;
+  background: var(--color-ink);
+  color: #fff;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: clamp(0.78rem, 0.67cqw, 0.95rem);
+  box-shadow: 0 10px 24px rgba(23, 20, 15, 0.25);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease, background 0.6s ease;
+  opacity: 0;
+  animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.92s forwards;
+}
+
+.cta-button svg {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cta-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px rgba(23, 20, 15, 0.32);
+  background: #2a251d;
+}
+
+/* Dark mode: the pill stays a dark "surface" rather than following
+   --color-ink (which flips light for text), so it keeps reading as a
+   solid button against the night sky. */
+.hero-stage[data-theme='dark'] .cta-button {
+  background: var(--color-surface-dark, #12182b);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+}
+
+.hero-stage[data-theme='dark'] .cta-button:hover {
+  background: #1c2340;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.55);
+}
+
+.cta-button:hover svg {
+  transform: translate(3px, -3px);
+}
+
+/* ---------- Paper plane ---------- */
+.paper-plane {
+  left: 26.5%;
+  top: 20.5%;
+  width: 15.5%;
+  z-index: 9;
+  opacity: 0;
+  animation: planeIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.5s forwards,
+    planeFloat 5s ease-in-out 1.5s infinite;
+  pointer-events: none;
+}
+
+@keyframes planeIn {
+  from { opacity: 0; transform: translate(-18px, 14px) rotate(-8deg) scale(0.92); }
+  to { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+}
+
+@keyframes planeFloat {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(3px, -8px) rotate(2deg); }
+}
+
+/* ---------- Portrait ---------- */
+.portrait {
+  left: 50%;
+  top: 12.5%;
+  width: 42%;
+  z-index: 20;
+  object-fit: contain;
+  object-position: top left;
+  opacity: 0;
+  animation: portraitIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.35s forwards;
+  pointer-events: none;
+  /* Soft bottom fade so the portrait blends into the scene instead of
+     ending in a hard rectangular edge — same treatment as the mobile
+     portrait below, just applied here for desktop/PC too. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 87%, transparent 99%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 87%, transparent 99%);
+}
+
+@keyframes portraitIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---------- Sticky notes near portrait ---------- */
+.note-ideas {
+  left: 80.2%;
+  top: 25.5%;
+  width: 9.1%;
+  z-index: 26;
+  transform: rotate(7deg);
+  filter: drop-shadow(var(--shadow-note));
+  opacity: 0;
+  animation: noteInRight 0.7s cubic-bezier(0.22, 1, 0.36, 1) 1.05s forwards;
+  pointer-events: none;
+}
+
+.note-ui {
+  left: 81%;
+  top: 36.5%;
+  width: 9.6%;
+  z-index: 25;
+  transform: rotate(3deg);
+  filter: drop-shadow(var(--shadow-note));
+  opacity: 0;
+  animation: noteInRight 0.7s cubic-bezier(0.22, 1, 0.36, 1) 1.18s forwards;
+  pointer-events: none;
+}
+
+.note-prototype {
+  left: 73.8%;
+  top: 56.5%;
+  width: 4.6%;
+  z-index: 27;
+  transform: rotate(-7deg);
+  filter: drop-shadow(var(--shadow-note));
+  opacity: 0;
+  animation: noteInRight 0.6s cubic-bezier(0.22, 1, 0.36, 1) 1.3s forwards;
+  pointer-events: none;
+}
+
+.note-designsystem {
+  left: 81.7%;
+  top: 56.2%;
+  width: 5%;
+  z-index: 27;
+  transform: rotate(5deg);
+  filter: drop-shadow(var(--shadow-note));
+  opacity: 0;
+  animation: noteInRight 0.6s cubic-bezier(0.22, 1, 0.36, 1) 1.4s forwards;
+  pointer-events: none;
+}
+
+@keyframes noteInRight {
+  from { opacity: 0; transform: rotate(var(--rot, 0deg)) translateX(20px) scale(0.9); }
+  to { opacity: 1; transform: rotate(var(--rot, 0deg)) translateX(0) scale(1); }
+}
+
+.note-ideas { --rot: 7deg; }
+.note-ui { --rot: 3deg; }
+.note-prototype { --rot: -7deg; }
+.note-designsystem { --rot: 5deg; }
+
+/* ---------- Foreground: books + mug ----------
+   Wrapper keeps the exact same position/size/entrance animation as the
+   original single image; the day and night photos stack inside it and
+   crossfade via the same expanding circular mask used for the
+   background, so the asset swap feels like part of one continuous
+   transformation rather than a separate effect. */
+.tea-books-wrap {
+  left: -6%;
+  top: 70.2%;
+  width: 24.6%;
+  aspect-ratio: 1536 / 1024;
+  z-index: 22;
+  opacity: 0;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.95s forwards;
+  pointer-events: none;
+}
+
+.tea-books-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Both tea-books artworks are transparent PNGs, so unlike the opaque
+   background photos, the night layer's own transparent gaps (around the
+   mug, between books, etc.) let the day layer show through underneath
+   once the reveal is fully open — even though the mask itself is
+   "correct". Explicitly fading the day layer out (in lockstep with the
+   same shared theme timing as the night reveal) keeps the two states
+   mutually exclusive instead of relying on the night art to fully
+   occlude it. */
+.tea-books-day {
+  transition: opacity var(--theme-duration) var(--theme-ease);
+}
+
+.hero-stage[data-theme='dark'] .tea-books-day {
+  opacity: 0;
+}
+
+/* Same feathered-edge technique as the background photo, anchored to
+   the same toggle origin, so the books/cup swap reads as part of one
+   continuous sweep rather than a separate, differently-timed effect. */
+.tea-books-night {
+  --reveal-radius: 0%;
+  -webkit-mask-image: radial-gradient(
+    circle at var(--theme-origin-x, 92%) var(--theme-origin-y, 8%),
+    #000 0%,
+    #000 max(0%, calc(var(--reveal-radius) - 12%)),
+    transparent var(--reveal-radius)
+  );
+  mask-image: radial-gradient(
+    circle at var(--theme-origin-x, 92%) var(--theme-origin-y, 8%),
+    #000 0%,
+    #000 max(0%, calc(var(--reveal-radius) - 12%)),
+    transparent var(--reveal-radius)
+  );
+  transition: --reveal-radius var(--theme-duration) var(--theme-ease);
+}
+
+.hero-stage[data-theme='dark'] .tea-books-night {
+  --reveal-radius: 150%;
+}
+
+/* ---------- Foreground: plant depth layers, both corners ---------- */
+.plant-left {
+  left: -4.5%;
+  top: 89%;
+  width: 11.5%;
+  z-index: 23;
+  transform: scaleX(-1);
+  opacity: 0;
+  animation: plantInLeft 0.8s cubic-bezier(0.22, 1, 0.36, 1) 1.05s forwards;
+  pointer-events: none;
+}
+
+.plant-right {
+  left: 91.5%;
+  top: 83%;
+  width: 12.5%;
+  z-index: 24;
+  opacity: 0;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 1s forwards;
+  pointer-events: none;
+}
+
+@keyframes plantInLeft {
+  from { opacity: 0; transform: scaleX(-1) translateY(16px); }
+  to { opacity: 1; transform: scaleX(-1) translateY(0); }
+}
+
+/* ---------- Custom pen-nib cursor (headline only) ---------- */
+.pen-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform;
+  transition: opacity 0.18s ease, transform 0.06s linear;
+  filter: drop-shadow(0 3px 6px rgba(23, 20, 15, 0.28));
+}
+
+.pen-cursor.is-active {
+  opacity: 1;
+}
+
+.pen-cursor-img {
+  display: block;
+  width: 38px;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* =========================================================
+   Responsive fallback — below ~900px switch to stacked flow
+   ========================================================= */
+@media (hover: none), (pointer: coarse) {
+  .pen-cursor {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  /* ----------------------------------------------------------------
+     Mobile hero rebuild — single fixed-viewport composition.
+     .hero-stage becomes exactly one screen tall (100svh) with
+     overflow hidden: NO vertical scrolling on the mobile Home page,
+     by design. Header, hero content, and the three feature cards are
+     no longer stacked in document flow (which is what made the page
+     grow to 1500px+ tall) — they are all absolutely positioned as
+     percentages of this one fixed-height stage instead, matching the
+     supplied mobile reference images' own proportions. Every rule in
+     this file is scoped to this <=900px query, so desktop (which has
+     no width cap here) never sees any of it.
+  ------------------------------------------------------------------- */
+  .hero-sticky-track {
+    height: calc(100svh + var(--cloud-h));
+    height: calc(100dvh + var(--cloud-h));
+  }
+
+  .hero-stage {
+    width: 100%;
+    height: 100svh;
+    height: 100dvh;
+    min-height: 100svh;
+    max-width: none;
+    aspect-ratio: auto;
+    display: block;
+    overflow: hidden;
+    padding-top: 0;
+    /* Fallback fill in case a layer doesn't fully reach an edge.
+       Sampled from the mobile background photos' own edge tones. */
+    background: #6a471f;
+  }
+
+  .hero-stage[data-theme='dark'] {
+    background: #0d1526;
+  }
+
+  /* Desktop 16:9 background photos are hidden on mobile — the dedicated
+     portrait-oriented mobile assets below take over instead. */
+  .bg-photo {
+    display: none;
+  }
+
+  /* Mobile background photo — covers the single fixed-height stage
+     edge-to-edge (this is now a true one-screen composition, so
+     object-fit: cover is correct here, unlike a tall scrolling page). */
+  .bg-photo-mobile {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    z-index: 0;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* The night photo's moon sits further right/lower in its own frame
+     than the day photo's sun; nudge it up slightly within the cover
+     crop so it clears the portrait/notes cluster, matching the
+     reference (moon in open sky above the portrait's head). */
+  .bg-photo-mobile-night {
+    object-position: center 5%;
+  }
+
+  .hero-stage[data-theme='dark'] .bg-photo-mobile-day {
+    opacity: 0;
+  }
+
+  .bg-photo-mobile-night {
+    --reveal-radius: 0%;
+    -webkit-mask-image: radial-gradient(
+      circle at var(--theme-origin-x, 92%) var(--theme-origin-y, 8%),
+      #000 0%,
+      #000 max(0%, calc(var(--reveal-radius) - 12%)),
+      transparent var(--reveal-radius)
+    );
+    mask-image: radial-gradient(
+      circle at var(--theme-origin-x, 92%) var(--theme-origin-y, 8%),
+      #000 0%,
+      #000 max(0%, calc(var(--reveal-radius) - 12%)),
+      transparent var(--reveal-radius)
+    );
+    transition: --reveal-radius var(--theme-duration) var(--theme-ease);
+    will-change: mask-image, -webkit-mask-image;
+  }
+
+  .hero-stage[data-theme='dark'] .bg-photo-mobile-night {
+    --reveal-radius: 150%;
+  }
+
+  .plant-left,
+  .plant-right {
+    display: none;
+  }
+
+  /* ---- Birds (Light Mode) / shooting stars (Dark Mode), mobile ----
+     The mobile header stacks into 3 rows (brand+menu / nav / pills)
+     that together span the full top ~13.6% of the stage, and the
+     portrait's own box starts almost immediately after that (~12.4%
+     from the left-hand edge, widening from ~42% across). That leaves
+     one genuinely open strip: right below the header, above the
+     headline, and left of the portrait — roughly 13.8%–16.5% top,
+     under ~40% left. Both layers are re-tuned to sit inside that
+     strip (and sized down) rather than the desktop bands, so they're
+     actually visible instead of permanently hidden behind opaque
+     header content. They still sweep across the full width per the
+     shared keyframes above, so each one crosses the strip and then
+     continues (invisibly, behind the portrait/cards) rather than
+     being clipped — nothing needed here for that, since .hero-stage
+     already clips overflow. */
+  .birds-1 {
+    top: 13.9%;
+    width: 54px;
+  }
+
+  .birds-2 {
+    top: 14.6%;
+    width: 42px;
+  }
+
+  .birds-3 {
+    top: 14.1%;
+    width: 34px;
+  }
+
+  /* .star-a/.star-b/.star-c no longer exist as fixed elements — meteors
+     are now spawned dynamically by ShootingStarField in Hero.jsx, which
+     targets this same open strip (top ~13.8%–16.5%, left under ~40%)
+     via its own randomized "mobile" range rather than fixed CSS rules. */
+
+  /* Independent of the cover-fit background photo (see comment on the
+     <img> in Hero.jsx) so it can be placed precisely in the open sky
+     to the upper-right, above the portrait/notes cluster, instead of
+     wherever it happens to fall inside the full-bleed night photo. */
+  .moon-mobile {
+    display: block;
+    position: absolute;
+    left: 51%;
+    top: 0%;
+    width: 16%;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity var(--theme-duration) var(--theme-ease);
+    pointer-events: none;
+  }
+
+  .hero-stage[data-theme='dark'] .moon-mobile {
+    opacity: 1;
+  }
+
+  /* Fills the entire stage — every percentage-positioned child below
+     is now a percentage of the FULL viewport (100% = 100svh tall),
+     which is what lets header, hero content and cards all share one
+     coordinate system and lets us guarantee they fit within it. */
+  .mobile-hero-visual {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* ---- Left decorative sketch note ---- */
+  .note-userflow-combined {
+    left: 1%;
+    top: 46%;
+    width: 14.5%;
+    transform: rotate(5deg);
+  }
+
+  /* ---- Headline / copy block ---- */
+  .hero-copy {
+    left: 5.5%;
+    top: 16.8%;
+    width: 51%;
+  }
+
+  .eyebrow {
+    font-size: 3.3cqw;
+    margin: 0 0 0.9cqw;
+  }
+
+  .headline {
+    font-size: 6.85cqw;
+    line-height: 0.98;
+  }
+
+  .underline-squiggle {
+    width: 15.5cqw;
+    margin: 0.9cqw 0 1.2cqw 0.2cqw;
+  }
+
+  .sub-copy {
+    font-size: 2.72cqw;
+    line-height: 1.4;
+    max-width: none;
+    margin: 0 0 2.1cqw;
+  }
+
+  .cta-button {
+    padding: 2cqw 3.6cqw;
+    font-size: 2.65cqw;
+    gap: 1.4cqw;
+  }
+
+  /* ---- Paper plane ---- */
+  .paper-plane {
+    left: 33%;
+    top: 21%;
+    width: 12.5%;
+  }
+
+  /* ---- Portrait ----
+     Intentionally sized wider than the remaining column and left to
+     clip against the stage's overflow:hidden edge on the right —
+     exactly like the reference, where his right arm runs off-frame.
+     This is what lets the portrait reach a natural, photographic
+     height (matching the reference's proportions) instead of being
+     squeezed into just the leftover width next to the copy block. */
+  .portrait {
+    left: 42%;
+    top: 12%;
+    width: 82%;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 87%, transparent 99%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 87%, transparent 99%);
+  }
+
+  /* ---- Sticky notes near portrait ----
+     Kept clear of the face (roughly the 14%-24% band, given the
+     portrait's own top/width above) by starting no earlier than ~27% —
+     they now sit across the torso/shoulder the way the reference does,
+     instead of across the eyes/nose/mouth. */
+  .note-ideas {
+    left: 79.5%;
+    top: 27%;
+    width: 14.5%;
+  }
+
+  .note-ui {
+    left: 76.5%;
+    top: 33.5%;
+    width: 16.5%;
+  }
+
+  .note-prototype {
+    left: 59%;
+    top: 45%;
+    width: 11.5%;
+  }
+
+  .note-designsystem {
+    left: 71%;
+    top: 48%;
+    width: 14%;
+  }
+
+  /* ---- Foreground: books + mug ----
+     Pulled toward the left edge and enlarged so it reads as a
+     prominent foreground element (matching the reference) instead of
+     a small centered afterthought — sized to still clear the feature
+     card band below with room to spare. */
+  .tea-books-wrap {
+    left: 2%;
+    top: 49%;
+    width: 64%;
+    /* Sits below the cards in paint order but the cards carry a much
+       higher z-index (see .feature-cards), so the first card still
+       renders on top wherever the two now intentionally overlap. */
+    z-index: 22;
+  }
+
+  /* Feature cards mobile layout (grid → stack, image-swap for light
+     mode) lives entirely in FeatureCards.css, scoped to this same
+     900px breakpoint — positioned to sit in the bottom band of this
+     same fixed-height stage. */
+
+  .theme-glow {
+    position: fixed;
+  }
+}

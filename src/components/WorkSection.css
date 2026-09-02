@@ -1,0 +1,718 @@
+/* ==========================================================================
+   Work section
+   Sits directly below Intro (the rest of the Home flow) in normal document
+   order — see SceneTransition.jsx. Same theme-scoping pattern as
+   .intro-content in Intro.css: local CSS custom properties keyed off
+   [data-theme], read from the shared `dark` prop, so this section can
+   switch Light/Dark cleanly without touching any global theme system.
+   ========================================================================== */
+
+.work-section {
+  --work-bg: var(--page-bg-light);
+  --work-surface: #ffffff;
+  --work-ink: #17140f;
+  --work-ink-soft: #55504a;
+  --work-ink-faint: #8a847a;
+  --work-accent: #f2941e;
+  --work-border: rgba(23, 20, 15, 0.1);
+  --work-border-strong: rgba(23, 20, 15, 0.16);
+  --work-shadow: 0 1px 2px rgba(23, 20, 15, 0.05), 0 16px 36px rgba(23, 20, 15, 0.08);
+  --work-shadow-hover: 0 4px 12px rgba(23, 20, 15, 0.07), 0 26px 48px rgba(23, 20, 15, 0.14);
+
+  --tone-amber-ink: #8a4f0a;
+  --tone-amber-bg: rgba(242, 148, 30, 0.14);
+  --tone-blue-ink: #1f4f8a;
+  --tone-blue-bg: rgba(76, 99, 224, 0.14);
+  --tone-green-ink: #276b34;
+  --tone-green-bg: rgba(63, 125, 82, 0.15);
+  --tone-terracotta-ink: #a13a1f;
+  --tone-terracotta-bg: rgba(201, 98, 42, 0.16);
+
+  --theme-duration: 1.7s;
+  --theme-ease: cubic-bezier(0.45, 0, 0.15, 1);
+
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  background: var(--work-bg);
+  color: var(--work-ink);
+  padding: clamp(64px, 8vh, 100px) clamp(24px, 6vw, 96px) clamp(80px, 10vh, 140px);
+  transition: background var(--theme-duration) var(--theme-ease), color var(--theme-duration) var(--theme-ease);
+}
+
+.work-section[data-theme='dark'] {
+  --work-bg: var(--page-bg-dark);
+  --work-surface: #17161a;
+  --work-ink: #f4f2ee;
+  --work-ink-soft: #b8b2a8;
+  --work-ink-faint: #847e74;
+  --work-accent: #ffb15c;
+  --work-border: rgba(244, 242, 238, 0.1);
+  --work-border-strong: rgba(244, 242, 238, 0.18);
+  --work-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 36px rgba(0, 0, 0, 0.32);
+  --work-shadow-hover: 0 4px 14px rgba(0, 0, 0, 0.35), 0 28px 52px rgba(0, 0, 0, 0.4);
+
+  --tone-amber-ink: #ffcb85;
+  --tone-amber-bg: rgba(255, 177, 92, 0.16);
+  --tone-blue-ink: #a7c1f5;
+  --tone-blue-bg: rgba(76, 99, 224, 0.2);
+  --tone-green-ink: #9fd6a8;
+  --tone-green-bg: rgba(63, 125, 82, 0.22);
+  --tone-terracotta-ink: #f0a479;
+  --tone-terracotta-bg: rgba(201, 98, 42, 0.22);
+}
+
+.work-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+/* ---------- Heading block ---------- */
+.work-heading-block {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto clamp(36px, 5vh, 56px);
+}
+
+/* ---------- Desktop heading sizing (>=1080px) ----------
+   Kept from the original fixed-viewport layout: a slightly tighter
+   heading block on wider screens. The section itself no longer clamps
+   to a single viewport height here -- the stacked scroll track below
+   (.work-stack-track) now owns the section's vertical rhythm, since it
+   needs real scroll distance across which the project transitions play
+   out rather than fitting everything into one static screen. */
+@media (min-width: 1080px) {
+  .work-section {
+    padding-top: clamp(56px, 7vh, 88px);
+  }
+
+  .work-inner {
+    max-width: 1100px;
+    width: 100%;
+  }
+
+  .work-heading-block {
+    margin: 0 auto clamp(28px, 4vh, 48px);
+  }
+
+  .work-heading {
+    font-size: clamp(1.6rem, 1rem + 1.6vw, 2.1rem);
+    margin: 0 0 10px;
+  }
+
+  .work-subtitle {
+    font-size: clamp(0.85rem, 0.8rem + 0.2vw, 0.95rem);
+  }
+}
+
+.work-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--work-accent);
+  margin: 0 0 14px;
+}
+
+.work-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--work-accent);
+}
+
+.work-heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 1.1rem + 2.6vw, 2.75rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 0 0 16px;
+}
+
+.work-heading-accent {
+  position: relative;
+  color: var(--work-accent);
+}
+
+.work-subtitle {
+  font-family: var(--font-body);
+  font-size: clamp(0.95rem, 0.85rem + 0.3vw, 1.05rem);
+  color: var(--work-ink-soft);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ---------- Grid (reduced-motion static fallback only) ----------
+   The animated stack (below) is the default presentation. This grid is
+   only rendered when prefers-reduced-motion is active (see
+   WorkSection.jsx), as a plain, fully-static list of all four projects
+   with no scroll-linked motion at all. */
+.work-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+@media (min-width: 640px) {
+  .work-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+}
+
+@media (min-width: 1080px) {
+  .work-grid.work-grid-static {
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(16px, 1.8vw, 24px);
+  }
+}
+
+/* ==========================================================================
+   Stacked project scroll experience
+   A tall track (height set inline from TRACK_VH in WorkSection.jsx)
+   reserves real scroll distance. Inside it, .work-stack-viewport is
+   `position: sticky`, so it pins in place while the user scrolls through
+   the track -- exactly the same technique Hero already uses for its own
+   Hero -> Intro handoff (see .hero-sticky-track / .hero-stage in
+   Hero.css). Once the track's extra height is used up, the viewport lets
+   go naturally and normal document scroll continues into Creative Lab --
+   no JS-driven "release", no scroll trapping, just where the sticky
+   element's containing block ends.
+   ========================================================================== */
+/* Wraps .work-stack-track. A sibling of the narrower .work-inner text
+   column (see WorkSection.jsx), so the stack gets its own, much wider
+   max-width on large screens -- see the >=1080px override below -- while
+   the heading above stays centered at its original reading width. At
+   narrower/mobile widths this simply matches .work-inner's own width, so
+   there is no visual change there from this split. */
+.work-stack-outer {
+  max-width: 1040px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (min-width: 1080px) {
+  .work-stack-outer {
+    /* Matches the widest content column already used elsewhere on the
+       site (see .about-hero / .about-stats in AboutPage.css) rather than
+       introducing a new, one-off measurement -- this is the existing
+       "wide section" width for this design. */
+    max-width: 1400px;
+  }
+}
+
+.work-stack-track {
+  position: relative;
+  width: 100%;
+}
+
+.work-stack-viewport {
+  position: sticky;
+  /* A little below the very top of the viewport so the heading block
+     (which sits above the track in normal flow and scrolls away
+     normally) has already settled out of the way before a card reaches
+     its full "active" size -- keeps the active card comfortably framed
+     rather than jammed under the heading. */
+  top: 3vh;
+  height: 92vh;
+  max-height: 780px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+
+  /* Entry fade -- see updateEntryProgress() in WorkSection.jsx. --work-entry
+     is written directly onto this element as a plain 0..1 scroll-position
+     value (not eased/transitioned here, since it already tracks the
+     user's actual scroll 1:1 every frame -- adding a CSS transition on
+     top would make it visibly lag behind the scroll it's supposed to be
+     following). The result is that the whole stack arrives gradually,
+     rising and settling into place as the user scrolls the section into
+     view, instead of the sticky viewport handing it over already fully
+     formed and full-opacity the instant it engages. Defaults to 1 (fully
+     settled) so nothing changes for browsers/paths where the JS effect
+     hasn't run yet (e.g. first paint before hydration). */
+  opacity: var(--work-entry, 1);
+  transform: translateY(calc((1 - var(--work-entry, 1)) * 46px))
+    scale(calc(0.94 + var(--work-entry, 1) * 0.06));
+}
+
+.work-stack-deck {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  /* A little shorter than the viewport's own height so the lower cards
+     in the stack (translated further down) still have clear room to
+     peek out underneath within .work-stack-viewport's visible area,
+     instead of the deck filling it edge to edge and clipping the peek.
+     Height is generous enough for a full-width 16:9 media band plus the
+     compact text block below it -- the card's own flex layout (media
+     aspect-ratio + text flex: 1) absorbs any small leftover space. */
+  height: calc(100% - 50px);
+  max-height: 650px;
+}
+
+/* Each stacked card is absolutely positioned within the deck so they can
+   overlap -- transform/opacity/z-index are all set inline per-frame from
+   WorkSection.jsx's scroll-position math (see StackedProjectCard). The
+   transition here only smooths out the small per-frame deltas between
+   scroll ticks into a continuous glide; it is intentionally short so it
+   never fights with or lags behind fast scrolling. */
+.work-stack-card {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  /* Must win over .work-card's own workCardIn entrance animation (which
+     sets a competing transform/opacity via animation, not just a base
+     style) -- animations always beat a plain style attribute in the
+     cascade regardless of source order or specificity, so animation
+     has to be explicitly cleared here rather than just left unset. */
+  animation: none !important;
+  opacity: 1;
+  /* Bottom-anchored scaling: cards further back in the stack shrink in
+     from the top while their bottom edge stays put, so each one's lower
+     edge peeks out below the card in front of it (see the transform math
+     in StackedProjectCard) instead of shrinking uniformly from the
+     center, which left the stack nearly invisible. */
+  transform-origin: 50% 100%;
+  /* One clear, polished movement per discrete project step (see the
+     one-scroll-per-project handling in WorkSection.jsx) rather than the
+     old short linear transition tuned for continuously-scrubbed
+     per-frame deltas -- this now has to visibly carry an entire card
+     transition on its own. Eased in AND out (symmetric ease-in-out,
+     rather than the old easeOut-only curve that started at full speed)
+     so the card visibly accelerates away from rest and decelerates into
+     its new position instead of snapping to speed instantly -- matching
+     "smooth acceleration -> smooth deceleration" rather than an abrupt
+     start. */
+  transition: transform 0.62s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+  will-change: transform, opacity;
+}
+
+/* Content flows naturally from the top of the body (matching the
+   reduced-motion grid cards' own flow), with the tags row anchored to
+   the bottom via margin-top: auto below -- this keeps the tags' gap to
+   the card's bottom edge fixed and identical across all four projects
+   (it always equals .work-card-body's own bottom padding), regardless
+   of how many lines a given description wraps to, rather than the old
+   center-justified block where that gap shrank or grew with content
+   length. */
+.work-stack-card .work-card-body {
+  justify-content: flex-start;
+}
+
+.work-stack-card .work-card-tags {
+  margin-top: auto;
+}
+
+/* Desktop/tablet only (mobile keeps its own compact 8/14/10 padding,
+   set separately below in the max-width: 639px block, untouched here):
+   a little extra bottom padding so the bottom-anchored tags row above
+   has comfortable, intentional breathing room before the card's own
+   border, matching the left/right/top padding instead of sitting
+   nearly flush against the edge. */
+@media (min-width: 640px) {
+  .work-stack-card .work-card-body {
+    padding-bottom: clamp(20px, 2.4vh, 28px);
+  }
+}
+
+.work-stack-card[aria-hidden='true'] {
+  pointer-events: none;
+}
+
+@media (min-width: 1080px) {
+  .work-stack-viewport {
+    height: 88vh;
+    max-height: 840px;
+  }
+
+  /* Sized so a full-width 16:9 media band (760px * 9/16 ≈ 427.5px) plus
+     the compact text block below it comfortably fits with margin to
+     spare -- media dominates, text stays a thin strip. Widened from the
+     original 700px now that .work-stack-outer (see above) gives the
+     whole stack a much larger column to work with on desktop -- the
+     active card itself grows a little, and the extra room around it is
+     used by the fanned-out waiting cards (see StackedProjectCard's x
+     offsets in WorkSection.jsx) instead of sitting empty on both sides. */
+  .work-stack-deck {
+    max-width: 760px;
+    max-height: 710px;
+  }
+}
+
+@media (min-width: 1300px) {
+  /* On very wide viewports .work-stack-outer has enough room (1400px)
+     for the fanned side cards to sit further out without ever crowding
+     the active card or clipping against the section's own padding. */
+  .work-stack-deck {
+    max-width: 800px;
+  }
+}
+
+@media (min-width: 1080px) and (max-height: 800px) {
+  .work-stack-viewport {
+    height: 86vh;
+    max-height: 720px;
+  }
+
+  .work-stack-deck {
+    max-width: 660px;
+    max-height: 655px;
+  }
+}
+
+/* ---------- Mobile stacked deck ----------
+   Sized so the sticky viewport itself uses most of the remaining screen
+   below the heading (rather than the previous 58vh, which left a large
+   band of plain background underneath the stack for the rest of the
+   pinned scroll -- there was simply nothing else on screen down there
+   until the track let go). Growing the viewport -- and the deck inside
+   it -- means that same vertical room is now spent on the stack itself:
+   a comfortably larger active card plus real, visible room for the
+   next 1-2 cards to peek out behind/below it, so the stack communicates
+   "more projects here" instead of leaving empty space to do it. */
+@media (max-width: 639px) {
+  .work-stack-viewport {
+    top: 1.5vh;
+    height: 80vh;
+    min-height: 500px;
+    max-height: 660px;
+  }
+
+  .work-stack-deck {
+    width: min(88vw, 360px);
+    max-width: 360px;
+    height: 435px;
+    max-height: none;
+  }
+}
+
+/* Smaller phones (e.g. 320-374px wide): the width clamp above already
+   scales the card down, so the deck height follows it down too, keeping
+   the same tight proportions instead of leaving extra body padding. */
+@media (max-width: 374px) {
+  .work-stack-deck {
+    width: 88vw;
+    height: 405px;
+  }
+
+  .work-stack-viewport {
+    min-height: 480px;
+  }
+}
+
+/* ---------- Card ---------- */
+.work-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  background: var(--work-surface);
+  border: 1px solid var(--work-border);
+  box-shadow: var(--work-shadow);
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  container-type: inline-size;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: workCardIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--stagger) * 0.09s);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease,
+    border-color 0.35s ease, background-color var(--theme-duration) var(--theme-ease);
+}
+
+@keyframes workCardIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.work-card:hover,
+.work-card:focus-visible {
+  box-shadow: var(--work-shadow-hover);
+  transform: translateY(-4px);
+  border-color: var(--work-border-strong);
+}
+
+.work-card-media {
+  position: relative;
+  /* True 16:9 media box, matching the uploaded 1920x1080 thumbnails and
+     1280x720 videos exactly -- since the container ratio equals the
+     source ratio, object-fit: cover below has nothing to crop; it just
+     fills the box pixel-for-pixel. This is enforced at every breakpoint
+     (no "aspect-ratio: auto" override anywhere) so the full composition
+     is always visible, never cropped/zoomed/stretched. */
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  overflow: hidden;
+  background: var(--work-bg);
+  flex-shrink: 0;
+}
+
+.work-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 22%;
+  display: block;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease;
+}
+
+.work-card:hover .work-card-media img,
+.work-card:focus-visible .work-card-media img {
+  transform: scale(1.035);
+}
+
+/* Hover-video layer -- sits on top of the thumbnail, sharing the exact
+   same box (position/size/object-fit/rounded corners come from this
+   same .work-card-media container), and only becomes visible once
+   HoverMedia confirms the clip is actually ready to play. */
+.work-card-media .media-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 22%;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+}
+
+.work-card-media.media-playing .media-video {
+  opacity: 1;
+}
+
+.work-card-media.media-playing img {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .work-card-media .media-video {
+    display: none;
+  }
+}
+
+.work-card-body {
+  padding: clamp(10px, 1.6vh, 18px) clamp(14px, 1.6vw, 22px);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.work-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: clamp(3px, 0.6vh, 8px);
+}
+
+.work-card-icon {
+  width: clamp(26px, 3vh, 32px);
+  height: clamp(26px, 3vh, 32px);
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.work-card-icon.tone-amber { background: var(--tone-amber-bg); color: var(--tone-amber-ink); }
+.work-card-icon.tone-blue { background: var(--tone-blue-bg); color: var(--tone-blue-ink); }
+.work-card-icon.tone-green { background: var(--tone-green-bg); color: var(--tone-green-ink); }
+.work-card-icon.tone-terracotta { background: var(--tone-terracotta-bg); color: var(--tone-terracotta-ink); }
+
+.work-card-arrow {
+  width: clamp(22px, 2.6vh, 28px);
+  height: clamp(22px, 2.6vh, 28px);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--work-border);
+  color: var(--work-ink);
+  flex-shrink: 0;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
+}
+
+.work-card:hover .work-card-arrow,
+.work-card:focus-visible .work-card-arrow {
+  transform: translate(3px, -3px) scale(1.05);
+  border-color: var(--work-border-strong);
+}
+
+.work-card-title {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 0.66rem + 0.9vh, 1.2rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.work-card:hover .work-card-title,
+.work-card:focus-visible .work-card-title {
+  transform: translateX(3px);
+}
+
+.work-card-category {
+  font-family: var(--font-body);
+  font-size: clamp(11px, 0.4vh + 9.5px, 13px);
+  color: var(--work-ink-soft);
+  font-weight: 500;
+  margin: 0 0 clamp(2px, 0.5vh, 6px);
+}
+
+.work-card-description {
+  font-family: var(--font-body);
+  font-size: clamp(12px, 0.4vh + 10px, 13.5px);
+  line-height: 1.44;
+  color: var(--work-ink-soft);
+  margin: 0 0 clamp(5px, 0.8vh, 10px);
+  /* Full text, wrapping naturally across as many lines as it needs --
+     no line-clamp/overflow truncation. The card/deck heights below are
+     sized with enough headroom (see .work-stack-deck) for the longest
+     of the four descriptions to fit without clipping. */
+}
+
+.work-card-tags {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.work-card-tag {
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 999px;
+}
+
+.work-card-tag.tone-amber { background: var(--tone-amber-bg); color: var(--tone-amber-ink); }
+.work-card-tag.tone-blue { background: var(--tone-blue-bg); color: var(--tone-blue-ink); }
+.work-card-tag.tone-green { background: var(--tone-green-bg); color: var(--tone-green-ink); }
+.work-card-tag.tone-terracotta { background: var(--tone-terracotta-bg); color: var(--tone-terracotta-ink); }
+
+/* Media-on-top, text-below at every card width -- kept as a single
+   column layout (not a row-at-wider-widths split) specifically so the
+   16:9 media box above always gets the card's full width to size
+   itself against, rather than being squeezed into a side column with
+   an arbitrary (non-16:9) height. This is also what keeps Work and
+   Creative Lab on one shared card/media system instead of two. */
+.work-card-body {
+  justify-content: flex-start;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .work-card {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  /* Belt-and-braces alongside the JS fallback in WorkSection.jsx (which
+     renders the plain .work-grid-static list instead of the stack when
+     reduced motion is on): if a stack card were ever present under
+     reduced motion, it would render inert and untransitioned rather
+     than mid-animation. */
+  .work-stack-card {
+    transition: none;
+  }
+}
+
+/* ---------- Compact mobile stack card ----------
+   Only targets .work-stack-card (the animated scroll deck), not the
+   plain .work-grid-static list used for prefers-reduced-motion -- that
+   fallback keeps the full title/description/tags for every project
+   since it has no motion to lean on for hierarchy. Here, with the deck
+   sized down (see .work-stack-deck above), the goal is a card that
+   reads as: artwork -> title -> tiny category/tags -> arrow, with the
+   16:9 media staying the clear visual hero and the text trimmed to a
+   thin strip rather than a competing block. */
+@media (max-width: 639px) {
+  .work-stack-card .work-card-body {
+    padding: 8px 14px 10px;
+    gap: 1px;
+    justify-content: flex-start;
+  }
+
+  .work-stack-card .work-card-top {
+    margin-bottom: 3px;
+  }
+
+  .work-stack-card .work-card-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+  }
+
+  .work-stack-card .work-card-arrow {
+    width: 20px;
+    height: 20px;
+  }
+
+  .work-stack-card .work-card-title {
+    font-size: 0.96rem;
+    line-height: 1.15;
+  }
+
+  .work-stack-card .work-card-category {
+    font-size: 10.5px;
+    margin: 0 0 4px;
+  }
+
+  /* Full description stays visible on the compact mobile card too --
+     shown at a smaller size than desktop so it still reads as a
+     secondary line under title/category, but never hidden or clamped.
+     .work-stack-deck's mobile height (below) is sized with this in
+     mind so it never overlaps the tags underneath it. */
+  .work-stack-card .work-card-description {
+    font-size: 11px;
+    line-height: 1.4;
+    margin: 0 0 4px;
+  }
+
+  .work-stack-card .work-card-tags {
+    margin-top: 0;
+    gap: 5px;
+  }
+
+  .work-stack-card .work-card-tag {
+    font-size: 9.5px;
+    padding: 3px 8px;
+  }
+}
+
+/* ---------- Desktop card sizing (>=1080px) ---------- */
+@media (min-width: 1080px) {
+  .work-card {
+    height: 100%;
+    flex-direction: column;
+  }
+}
+
+/* Slightly shorter desktop heights (e.g. 1536x864, 1440x900 with browser
+   chrome) benefit from a touch more compression on top of the general
+   rules above -- keeps a comfortable margin instead of sitting right at
+   the edge of overflow. */
+@media (min-width: 1080px) and (max-height: 800px) {
+  .work-grid {
+    height: clamp(320px, 52vh, 480px);
+  }
+
+  .work-heading-block {
+    margin: 0 auto clamp(14px, 2vh, 22px);
+  }
+}

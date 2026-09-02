@@ -1,0 +1,114 @@
+/* ==========================================================================
+   NavPill -- shared by Header and ContextualNav. The base .nav-pill /
+   .nav-item / .is-active rules themselves still live in Header.css (both
+   components render into a themed root that already defines those
+   classes, and this file only adds the sliding indicator on top -- see
+   the comment in NavPill.jsx for why the two are layered rather than
+   the indicator replacing .is-active's own styling outright).
+   ========================================================================== */
+
+.nav-pill {
+  position: relative;
+}
+
+/* ---------- Stable per-button width (fixes navbar resizing on active state) ----------
+   .nav-item's own font-weight jumps from 500 (default) to 600 (.is-active,
+   see Header.css) -- bold text measures a few px wider than regular at
+   the same font-size, and since .nav-item has no fixed width of its
+   own (intentionally -- it sizes to its label), that made *every*
+   button quietly resize the moment it became active, most visibly on
+   the longer labels ("Creative Lab", "Playground"). Because .nav-pill
+   itself also has no fixed width (it sizes to the row of buttons), that
+   per-button resize propagated outward into the whole navbar visibly
+   changing size depending on which item was currently active -- the
+   exact inconsistency being fixed here.
+
+   Fix: each button lays out as a single-cell CSS grid with two stacked
+   children occupying that same cell (grid's own stacking behaviour,
+   no position:absolute needed) -- the real visible text, and an
+   invisible copy of the same label permanently rendered at the bold
+   (600) weight. A grid track sized `auto` takes the width of its
+   widest occupant, so the button's own intrinsic width becomes "as
+   wide as the label would be if bold", full stop -- toggling the real
+   text between 500 and 600 no longer changes anything, because the
+   button was already reserving the bold-width the whole time. */
+.nav-item {
+  display: grid;
+  /* Desktop pill: buttons are content-sized and centered (matches the
+     original inline-text centering). Mobile's own rule below switches
+     this to left-aligned to match its existing `text-align: left`
+     full-width row layout. */
+  justify-items: center;
+}
+
+.nav-item-sizer,
+.nav-item-text {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+}
+
+.nav-item-sizer {
+  font-weight: 600;
+  visibility: hidden;
+}
+
+@media (max-width: 900px) {
+  .nav-item {
+    justify-items: start;
+  }
+}
+
+.nav-pill-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 0;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(20, 14, 2, 0.08);
+  pointer-events: none;
+  /* The Smart-Animate feel: both position and width tween together with
+     a slight overshoot easing, so the indicator reads as one shape
+     travelling and gently resizing to fit the next label rather than
+     a flat linear slide. */
+  transition: transform 0.5s cubic-bezier(0.34, 1.15, 0.32, 1), width 0.5s cubic-bezier(0.34, 1.15, 0.32, 1),
+    opacity 0.25s ease;
+}
+
+[data-theme='dark'] .nav-pill-indicator {
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* With the indicator present and positioned, the active button's own
+   flat fill (defined in Header.css) would double up behind it -- drop
+   just the background/shadow here, keeping color/font-weight so the
+   label itself is unaffected either way. Text still sits above the
+   indicator via .nav-item's own z-index: 0 + this being z-index: 0 too
+   but earlier in source order (first painted = furthest back). */
+.nav-pill:has(.nav-pill-indicator) .nav-item.is-active {
+  background: transparent;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-pill-indicator {
+    transition: opacity 0.15s ease;
+  }
+}
+
+/* Mobile keeps its existing vertical-stack ::before treatment per
+   button (see Header.css's mobile block) -- the horizontal
+   travel/resize tween doesn't map onto a stacked list the same way, so
+   the shared indicator only renders/applies on the desktop row layout. */
+@media (max-width: 900px) {
+  .nav-pill-indicator {
+    display: none;
+  }
+
+  .nav-pill:has(.nav-pill-indicator) .nav-item.is-active {
+    background: revert;
+    box-shadow: revert;
+  }
+}

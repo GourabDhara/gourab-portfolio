@@ -1,0 +1,431 @@
+/* ==========================================================================
+   Creative Lab section
+   Sits directly below Work in normal document order (see
+   SceneTransition.jsx). Same theme-scoping pattern as .work-section in
+   WorkSection.css: local CSS custom properties keyed off [data-theme],
+   read from the shared `dark` prop -- no separate/global theme system.
+
+   Visual identity carried over from the source Creative Lab project: a
+   bold uppercase display treatment, numbered cards, a dark "panel" card
+   surface (distinct from Work's light card surface) and a warm orange
+   accent -- re-expressed with this portfolio's own font tokens
+   (--font-display / --font-body) and motion curve
+   (--theme-duration/--theme-ease) instead of that project's separate
+   token set.
+   ========================================================================== */
+
+.lab-section {
+  --lab-bg: var(--page-bg-light);
+  --lab-panel: #17140f;
+  --lab-panel-soft: #211c16;
+  --lab-panel-text: #f6f1e7;
+  --lab-panel-muted: #b4aa98;
+  --lab-panel-border: rgba(246, 241, 231, 0.1);
+  --lab-ink: #17140f;
+  --lab-ink-soft: #55504a;
+  --lab-accent: #ff5a1f;
+  --lab-shadow: 0 1px 2px rgba(23, 20, 15, 0.05), 0 16px 36px rgba(23, 20, 15, 0.08);
+  --lab-shadow-hover: 0 4px 12px rgba(23, 20, 15, 0.07), 0 26px 48px rgba(23, 20, 15, 0.14);
+
+  --lab-tone-terracotta: #ff9d66;
+  --lab-tone-lavender: #b79dff;
+  --lab-tone-amber: #f2941e;
+  --lab-tone-pink: #ff6fa6;
+
+  --theme-duration: 1.7s;
+  --theme-ease: cubic-bezier(0.45, 0, 0.15, 1);
+
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  background: var(--lab-bg);
+  color: var(--lab-ink);
+  padding: clamp(64px, 8vh, 100px) clamp(24px, 6vw, 96px) clamp(80px, 10vh, 140px);
+  transition: background var(--theme-duration) var(--theme-ease), color var(--theme-duration) var(--theme-ease);
+}
+
+.lab-section[data-theme='dark'] {
+  --lab-bg: var(--page-bg-dark);
+  --lab-panel: #0f0e0c;
+  --lab-panel-soft: #18150f;
+  --lab-panel-text: #f6f1e7;
+  --lab-panel-muted: #a79e8c;
+  --lab-panel-border: rgba(246, 241, 231, 0.08);
+  --lab-ink: #f4f2ee;
+  --lab-ink-soft: #b8b2a8;
+  --lab-accent: #ff7a45;
+  --lab-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 36px rgba(0, 0, 0, 0.32);
+  --lab-shadow-hover: 0 4px 14px rgba(0, 0, 0, 0.35), 0 28px 52px rgba(0, 0, 0, 0.4);
+
+  --lab-tone-terracotta: #ffb18c;
+  --lab-tone-lavender: #cabdff;
+  --lab-tone-amber: #ffb15c;
+  --lab-tone-pink: #ff97c0;
+}
+
+.lab-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+/* ---------- Heading block ---------- */
+.lab-heading-block {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto clamp(36px, 5vh, 56px);
+}
+
+.lab-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono, var(--font-body));
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lab-accent);
+  margin: 0 0 14px;
+}
+
+.lab-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--lab-accent);
+}
+
+.lab-heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 1.1rem + 2.6vw, 2.75rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin: 0 0 16px;
+  text-transform: uppercase;
+}
+
+.lab-heading-accent {
+  color: var(--lab-accent);
+}
+
+.lab-subtitle {
+  font-family: var(--font-body);
+  font-size: clamp(0.95rem, 0.85rem + 0.3vw, 1.05rem);
+  color: var(--lab-ink-soft);
+  line-height: 1.6;
+  margin: 0;
+  text-transform: none;
+}
+
+/* ---------- Grid ---------- */
+.lab-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+@media (min-width: 640px) {
+  .lab-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ---------- Desktop 2x2 grid sizing (>=1080px) ----------
+   Same card-density technique as WorkSection's own desktop block (see
+   the matching comment there) so Work and Creative Lab read as the same
+   system, not two differently-tuned sections. Unlike Work, this section
+   is NOT flex-centered/locked to exactly one viewport -- Creative Lab is
+   the last section before About in the scroll flow (see
+   SceneTransition.jsx), and its content (heading + 2x2 grid) already
+   runs close to one viewport tall on its own with normal padding. A
+   min-height floor of one viewport (rather than the much taller 145vh
+   this used to carry, which forced 40-50vh of pure empty space below
+   the grid before About could begin) keeps the same guaranteed-taller-
+   than-content sizing and scroll room, without manufacturing a gap
+   nothing here actually needs. */
+@media (min-width: 1080px) {
+  .lab-section {
+    /* Extra top clearance vs. Work's equivalent padding: Work sits
+       inside a flex-centered, min-height:100vh box, so its content is
+       pushed down well clear of the fixed ContextualNav pill above it
+       by the centering itself. Lab intentionally isn't centered (see
+       the comment above -- it needs real scroll room instead), so its
+       padding-top has to clear the pill on its own; the pill occupies
+       roughly the top ~70px of the viewport (see ContextualNav.css's
+       `top` + the pill's own height), so this pads a bit past that. */
+    padding: clamp(96px, 11vh, 132px) clamp(24px, 6vw, 96px) clamp(56px, 7vh, 96px);
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .lab-inner {
+    max-width: 1180px;
+    width: 100%;
+  }
+
+  .lab-heading-block {
+    margin: 0 auto clamp(18px, 2.6vh, 32px);
+  }
+
+  .lab-heading {
+    font-size: clamp(1.6rem, 1rem + 1.6vw, 2.1rem);
+    margin: 0 0 10px;
+  }
+
+  .lab-subtitle {
+    font-size: clamp(0.85rem, 0.8rem + 0.2vw, 0.95rem);
+  }
+
+  .lab-grid {
+    grid-template-columns: repeat(2, 1fr);
+    /* Rows size naturally to each card's own content (header + full-
+       width 16:9 media) rather than a fixed viewport-based height --
+       since the media box is now a true 16:9 aspect-ratio, forcing rows
+       into a fixed shorter height would just recreate the same cropping
+       problem one level up. */
+    grid-auto-rows: auto;
+    gap: clamp(12px, 1.6vh, 20px) clamp(16px, 1.6vw, 24px);
+  }
+}
+
+@media (min-width: 1080px) and (max-height: 800px) {
+  .lab-heading-block {
+    margin: 0 auto clamp(14px, 2vh, 22px);
+  }
+}
+
+/* ---------- Card ---------- */
+.lab-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid var(--lab-panel-border);
+  background: var(--lab-panel);
+  color: var(--lab-panel-text);
+  box-shadow: var(--lab-shadow);
+  /* No fixed card-level aspect-ratio -- height comes naturally from the
+     header plus the 16:9 media box below it (see .lab-card-media), the
+     same content-driven sizing model Work's cards use, so the media
+     never gets squeezed to fit a mismatched container shape. */
+  text-decoration: none;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: labCardIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--stagger) * 0.09s);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease,
+    border-color 0.35s ease, background-color var(--theme-duration) var(--theme-ease);
+}
+
+@keyframes labCardIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lab-card:hover,
+.lab-card:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: var(--lab-shadow-hover);
+  border-color: var(--lab-accent);
+}
+
+.lab-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: clamp(14px, 1.8vh, 24px) clamp(16px, 1.8vw, 24px) clamp(6px, 1vh, 12px);
+  flex: 0 0 auto;
+}
+
+.lab-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.lab-card-num {
+  font-family: var(--font-mono, var(--font-body));
+  font-size: 10.5px;
+  color: var(--lab-accent);
+  letter-spacing: 0.08em;
+}
+
+.lab-card-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  font-size: clamp(0.98rem, 0.6rem + 0.9vw, 1.28rem);
+  line-height: 1.08;
+  margin: 0;
+  transition: letter-spacing 0.35s ease;
+}
+
+.lab-card:hover .lab-card-title {
+  letter-spacing: 0.005em;
+}
+
+.lab-card-cat {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--lab-panel-muted);
+  font-weight: 500;
+}
+
+.lab-card-arrow {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--lab-panel-border);
+  display: grid;
+  place-items: center;
+  color: var(--lab-panel-text);
+  transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+
+.lab-card:hover .lab-card-arrow {
+  background: var(--lab-accent);
+  border-color: var(--lab-accent);
+  color: #fff;
+  transform: translate(2px, -2px);
+}
+
+.lab-card-media {
+  /* True 16:9 media box -- same system as Work's .work-card-media,
+     matching the uploaded 1920x1080 thumbnails / 1280x720 videos
+     exactly, so the full composition always shows with nothing cropped,
+     zoomed or stretched (see WorkSection.css for the shared rationale).
+     Full card width, fixed 16:9 height (not flex: 1 filling whatever's
+     left below the header), so it's never squeezed into an arbitrary
+     leftover shape. */
+  aspect-ratio: 16 / 9;
+  flex: 0 0 auto;
+  width: calc(100% - clamp(16px, 2vw, 24px));
+  position: relative;
+  margin: 0 clamp(8px, 1vw, 12px) clamp(8px, 1.2vh, 12px);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--lab-panel-soft);
+}
+
+.lab-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease;
+}
+
+.lab-card:hover .lab-card-media img {
+  transform: scale(1.045);
+}
+
+/* Hover-video layer -- see WorkSection.css for the matching pattern.
+   .lab-card-media is already position: relative, so this overlays the
+   thumbnail exactly, inheriting the same rounded corners/overflow. */
+.lab-card-media .media-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+}
+
+.lab-card-media.media-playing .media-video {
+  opacity: 1;
+}
+
+.lab-card-media.media-playing img {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-card-media .media-video {
+    display: none;
+  }
+}
+
+.lab-card-cover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  text-align: center;
+  background: var(--lab-panel-soft);
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lab-card:hover .lab-card-cover {
+  transform: scale(1.035);
+}
+
+.lab-card-cover span {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  font-size: clamp(1.05rem, 0.7rem + 1.6vw, 1.9rem);
+  opacity: 0.95;
+}
+
+.lab-card-cover.tone-terracotta { color: var(--lab-tone-terracotta); }
+.lab-card-cover.tone-lavender { color: var(--lab-tone-lavender); }
+.lab-card-cover.tone-amber { color: var(--lab-tone-amber); }
+.lab-card-cover.tone-pink { color: var(--lab-tone-pink); }
+
+@media (min-width: 1080px) {
+  .lab-card-head {
+    padding: clamp(10px, 1.4vh, 16px) clamp(14px, 1.4vw, 20px) clamp(4px, 0.6vh, 8px);
+  }
+
+  .lab-card-title {
+    font-size: clamp(0.9rem, 0.55rem + 0.8vh, 1.14rem);
+  }
+
+  .lab-card-cat {
+    font-size: clamp(10.5px, 0.4vh + 9px, 12px);
+  }
+
+  .lab-card-arrow {
+    width: clamp(26px, 3.2vh, 32px);
+    height: clamp(26px, 3.2vh, 32px);
+  }
+
+  .lab-card-cover span {
+    font-size: clamp(0.95rem, 1vh + 0.6vw, 1.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-card {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 640px) {
+  .lab-card-title {
+    font-size: clamp(1.12rem, 5.4vw, 1.4rem);
+  }
+
+  .lab-card-cover span {
+    font-size: clamp(1.15rem, 7.5vw, 2rem);
+  }
+}

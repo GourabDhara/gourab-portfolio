@@ -1,0 +1,73 @@
+/* ==========================================================================
+   PrimaryNav -- the one persistent floating nav-pill wrapper for desktop.
+   .nav-pill / .nav-item / .is-active styling itself still lives in
+   Header.css and is reused verbatim (see the comment in PrimaryNav.jsx);
+   this file only positions the wrapper and provides the same `cqw` query
+   container + theme tokens ContextualNav already used, so the pill's
+   size/spacing/theming is pixel-for-pixel identical to before.
+
+   Unlike the old per-section ContextualNav wrapper, there is no
+   is-scroll-hidden / opacity / transform show-hide treatment here at
+   all -- this element is simply always on screen, in the same position,
+   at the same size, for the entire desktop experience. Only NavPill's
+   own internal indicator (see NavPill.css) ever moves.
+   ========================================================================== */
+.primary-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 0;
+  z-index: 60;
+  container-type: inline-size;
+  pointer-events: none;
+}
+
+.primary-nav .nav-pill {
+  position: fixed;
+  top: clamp(16px, 2.4vh, 28px);
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+/* Local theme tokens so the reused .nav-pill/.nav-item rules from
+   Header.css (which key off [data-theme='dark'] and the plain CSS
+   custom properties they read, e.g. --surface-glass-strong) resolve
+   correctly here too -- same values ContextualNav already used. */
+.primary-nav {
+  --color-ink: #17140f;
+  --color-ink-soft: #4a453e;
+  --surface-glass-strong: rgba(255, 253, 248, 0.85);
+  --surface-glass-border: rgba(255, 255, 255, 0.7);
+  --shadow-soft: 0 8px 24px rgba(30, 22, 6, 0.1);
+  --theme-duration: 1.7s;
+  --theme-ease: cubic-bezier(0.45, 0, 0.15, 1);
+}
+
+.primary-nav[data-theme='dark'] {
+  --color-ink: #f6f2ea;
+  --color-ink-soft: #c6c0b5;
+  --surface-glass-strong: rgba(20, 25, 38, 0.85);
+  --surface-glass-border: rgba(255, 255, 255, 0.14);
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 900px) {
+  .primary-nav {
+    display: none;
+  }
+}
+
+/* Forced fully invisible while the Contact page's BARU-OG overlay is
+   open (see PrimaryNav.jsx / App.jsx / ContactPage.jsx). visibility
+   (not display: none) keeps layout/measurement undisturbed; the `inert`
+   + aria-hidden attributes set alongside this class (see PrimaryNav.jsx)
+   already remove it from hit-testing and focus, so pointer-events here
+   is just a belt-and-braces backup for browsers without `inert`
+   support. No transition -- this should track the overlay's own open/
+   close state exactly, not lag behind it. */
+.primary-nav.is-overlay-hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
