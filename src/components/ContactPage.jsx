@@ -66,20 +66,22 @@ const CONTACT_CARDS = [
     ),
   },
   {
-    id: 'talk',
-    label: "Let's Talk",
-    value: 'Schedule a quick call',
-    href: 'mailto:dharagourab24@gmail.com?subject=Let%27s%20talk',
+    id: 'resume',
+    label: 'Resume',
+    value: 'View my resume',
+    href: 'https://drive.google.com/file/d/1_4lFX-J4bnxkW7uP_X9yQHF8c8arMcYJ/view?usp=sharing',
     badge: 'amber',
     icon: (
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true">
         <path
-          d="M21 3 3 10.5l6.3 2.4L12 21l3.4-6.4L21 3Zm0 0-11.4 9.9"
+          d="M7 2.5h7.2L18.5 7v14a.5.5 0 0 1-.5.5H7a.5.5 0 0 1-.5-.5V3a.5.5 0 0 1 .5-.5Z"
           stroke="currentColor"
           strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
+        <path d="M14 2.5V7h4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9 12.5h6M9 15.8h6M9 9.2h2.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     ),
   },
